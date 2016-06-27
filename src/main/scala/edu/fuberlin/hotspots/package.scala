@@ -25,4 +25,10 @@ package object hotspots {
              improvementSurcharge: Double,
              totalAmount: Double
              )
+
+  def parse(line: String): Trip = {
+    Trip(2, new DateTime(), new DateTime(), 0, 0, new Point(0,0), 0, "",
+      new Point(0,0), 0, 0, 0, 0, 0, 0, 0, 0)
+
+  }
 }
