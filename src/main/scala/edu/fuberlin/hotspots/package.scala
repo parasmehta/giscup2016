@@ -31,4 +31,14 @@ package object hotspots {
     val dropoffLocation = new Point(fields(9).toDouble, fields(10).toDouble)
     Trip(vendorID, pickupTime, dropoffTime, passengerCount, tripDistance, pickupLocation, dropoffLocation)
   }
+
+  def safe[I, O](f:I => O): I => Either[O, (I, Exception)] = {
+    {(input) =>
+      try {
+        Left(f(input))
+      } catch {
+        case e: Exception => Right((input, e))
+      }
+    }
+  }
 }
