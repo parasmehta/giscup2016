@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if ! which spark-shell > /dev/null ; then
+  echo 'spark-shell was not found in $PATH.'
+  echo 'Will exit'
+  exit 1
+fi
+
+spark-shell -i hotspotrc.scala --driver-memory 6g --jars target/scala-2.10/hotspots-assembly-1.0.jar
