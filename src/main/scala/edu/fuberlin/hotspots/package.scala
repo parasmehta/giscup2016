@@ -13,7 +13,6 @@ import edu.fuberlin.hotspots.GeoJsonProtocol._
   * Created by Christian Windolf on 24.06.16.
   */
 package object hotspots {
-  val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
   case class Trip(vendorID: Int,
              pickupTime: DateTime,
              dropoffTime: DateTime,
@@ -24,6 +23,7 @@ package object hotspots {
              )
 
   def parseTrip(line: String): Trip = {
+    val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
     val fields = line.split(",")
     val vendorID = fields(0).toInt
     val pickupTime = new DateTime(timeFormat.parse(fields(1)))
