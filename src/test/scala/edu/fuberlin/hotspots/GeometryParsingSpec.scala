@@ -1,7 +1,6 @@
 package edu.fuberlin.hotspots
 
 import com.esri.core.geometry.Point
-import GeoHelpers._
 import org.scalatest.{FlatSpec, Matchers}
 
 /**

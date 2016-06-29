@@ -5,6 +5,9 @@ import java.util.Locale
 
 import com.esri.core.geometry.Point
 import org.joda.time.DateTime
+import spray.json._
+import edu.fuberlin.hotspots.GeoHelpers._
+import edu.fuberlin.hotspots.GeoJsonProtocol._
 
 /**
   * Created by Christian Windolf on 24.06.16.
@@ -40,5 +43,18 @@ package object hotspots {
         case e: Exception => Right((input, e))
       }
     }
+  }
+
+  def readNYCBoroughs(src: scala.io.Source): Seq[Feature] = {
+    val jsObj = src.mkString.parseJson.asJsObject
+    val features = jsObj.fields("features").asInstanceOf[JsArray]
+    features.elements.map(_.convertTo[Feature])
+  }
+
+  lazy val boroughs = readNYCBoroughs(scala.io.Source.fromURL(getClass().getResource("/nyc-boroughs.geojson")))
+
+  def boroughOf(p: Point) = boroughs.find(_.geometry.contains(p)) match {
+    case Some(b) => Some(b.borough)
+    case None => None
   }
 }
