@@ -2,7 +2,7 @@ name := "hotspots"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.10.5"
 
 libraryDependencies += "joda-time" % "joda-time" % "2.9.4"
 libraryDependencies += "org.joda" % "joda-convert" % "1.8"
