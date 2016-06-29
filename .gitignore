@@ -1,3 +1,5 @@
 target/
 .*.sw[po]
 .idea/
+derby.log
+metastore_db
