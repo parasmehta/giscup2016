@@ -22,25 +22,25 @@ class ParseSpec extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "have the correct pickup time" in {
-    val duration = new Duration(new DateTime(2015, 1, 15, 19, 5), trip.pickupTime)
+    val duration = new Duration(new DateTime(2015, 1, 15, 19, 5), trip.pickup.time)
     val minutes = duration.getStandardMinutes
     minutes shouldBe 0
   }
 
   it should "have the correct dropoff time" in {
-    val duration = new Duration(new DateTime(2015, 1, 15, 19, 23), trip.dropoffTime)
+    val duration = new Duration(new DateTime(2015, 1, 15, 19, 23), trip.dropoff.time)
     val minutes = duration.getStandardMinutes
     minutes shouldBe 0
   }
 
   it should "have the correct pickup location" in {
-    trip.pickupLocation.getX shouldBe -73.9938 +- 0.0001
-    trip.pickupLocation.getY shouldBe 40.7501 +- 0.0001
+    trip.pickup.location.getX shouldBe -73.9938 +- 0.0001
+    trip.pickup.location.getY shouldBe 40.7501 +- 0.0001
   }
 
   it should "have the correct dropoff location" in {
-    trip.dropoffLocation.getX shouldBe -73.9747 +- 0.0001
-    trip.dropoffLocation.getY shouldBe 40.7506 +- 0.0001
+    trip.dropoff.location.getX shouldBe -73.9747 +- 0.0001
+    trip.dropoff.location.getY shouldBe 40.7506 +- 0.0001
   }
 
   it should "have the correct trip distance" in {

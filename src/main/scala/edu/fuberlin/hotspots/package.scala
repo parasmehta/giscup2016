@@ -13,35 +13,42 @@ import edu.fuberlin.hotspots.GeoJsonProtocol._
   * Created by Christian Windolf on 24.06.16.
   */
 package object hotspots {
-  case class Trip(vendorID: Int,
-             pickupTime: DateTime,
-             dropoffTime: DateTime,
-             passengerCount: Int,
-             tripDistance: Double,
-             pickupLocation: Point,
-             dropoffLocation: Point
-             )
+  case class STPoint(location: Point, time: DateTime)
 
-  def parseTrip(line: String): Trip = {
-    val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
-    val fields = line.split(",")
-    val vendorID = fields(0).toInt
-    val pickupTime = new DateTime(timeFormat.parse(fields(1)))
-    val dropoffTime = new DateTime(timeFormat.parse(fields(2)))
-    val passengerCount = fields(3).toInt
-    val tripDistance = fields(4).toDouble
-    val pickupLocation = new Point(fields(5).toDouble, fields(6).toDouble)
-    val dropoffLocation = new Point(fields(9).toDouble, fields(10).toDouble)
-    Trip(vendorID, pickupTime, dropoffTime, passengerCount, tripDistance, pickupLocation, dropoffLocation)
+  def cellsFor(cellSize:BigDecimal, timeStep: Int):STPoint => (Int, Int, Int) = {
+    (point:STPoint) => {
+      ((point.location.getX/cellSize).toInt, (point.location.getY/cellSize).toInt, point.time.getDayOfYear)
+    }
   }
 
-  def safe[I, O](f:I => O): I => Either[O, (I, Exception)] = {
+  case class Trip(vendorID: Int, pickup: STPoint, dropoff: STPoint, passengerCount: Int, tripDistance: Double)
+
+  def parseTrip(line: String): Trip = {
+    val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
+    val fields = line.split(",")
+    val vendorID = fields(0).toInt
+    val pickup = new STPoint(new Point(fields(5).toDouble, fields(6).toDouble), new DateTime(format.parse(fields(1))))
+    val dropoff = new STPoint(new Point(fields(9).toDouble, fields(10).toDouble), new DateTime(format.parse(fields(2))))
+    val passengerCount = fields(3).toInt
+    val tripDistance = fields(4).toDouble
+    Trip(vendorID, pickup, dropoff, passengerCount, tripDistance)
+  }
+
+  def saveErrors[I, O](f:I => O): I => Either[O, (I, Exception)] = {
     {(input) =>
       try {
         Left(f(input))
       } catch {
         case e: Exception => Right((input, e))
       }
+    }
+  }
+
+  def skipErrors[I, O](f: I => O): I => Option[O] = {
+    {(input) =>
+      try{
+        Some(f(input))
+      } catch{case e:Exception => None}
     }
   }
 
