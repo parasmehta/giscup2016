@@ -1,6 +1,7 @@
 package edu.fuberlin.hotspots
 
 import java.math.BigDecimal
+
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -17,11 +18,6 @@ object Submission {
     val inputDirectory = args(0)
 
     val outputFile = args(1)
-
-    if(inputDirectory.startsWith("hdfs") || outputFile.startsWith("hdfs")) {
-      println("HDFS is not supported yet")
-      return
-    }
 
     val gridSize = try {new BigDecimal(args(2))} catch {
       case e:NumberFormatException => {
