@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 import com.esri.core.geometry.Point
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Duration}
 import spray.json._
 import edu.fuberlin.hotspots.GeoHelpers._
 import edu.fuberlin.hotspots.GeoJsonProtocol._
@@ -21,7 +21,14 @@ package object hotspots {
     }
   }
 
-  case class Trip(vendorID: Int, pickup: STPoint, dropoff: STPoint, passengerCount: Int, tripDistance: Double)
+  case class Trip(vendorID: Int, pickup: STPoint, dropoff: STPoint, passengerCount: Int, tripDistance: Double) {
+    if(pickup.time.isAfter(dropoff.time)) {
+      throw new IllegalArgumentException(s"pickup time at ${pickup.time} was before dropoff time at ${dropoff.time}")
+    }
+    if(new Duration(pickup.time, dropoff.time).getStandardHours > 4) {
+      throw new IllegalArgumentException(s"There were more than four hours between pickup and dropoff time")
+    }
+  }
 
   def parseTrip(line: String): Trip = {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
