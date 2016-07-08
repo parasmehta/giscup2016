@@ -3,6 +3,7 @@ package edu.fuberlin.hotspots
 import java.math.BigDecimal
 
 import org.apache.spark.{SparkConf, SparkContext}
+import SparkHelpers._
 
 /**
   * Created by Christian Windolf on 29.06.16.
@@ -35,8 +36,10 @@ object Submission {
       }
     }
 
-    val sample = if(args.length >= 5) args(4).toDouble else 1
-    submit(inputDirectory, outputFile, gridSize, timeSpan, sample)
+    val sample = args.lift(4).getOrElse("1").toDouble
+    val conf = new SparkConf().setAppName("Fu-Berlin")
+    val sc = new SparkContext(conf)
+    submit(sc, inputDirectory, outputFile, gridSize, timeSpan, sample)
   }
 
   def printHelp = {
@@ -49,14 +52,13 @@ object Submission {
     println("  {temporal gridsize in days} (1 for example)")
   }
 
-  def submit(inputDir:String, outputFile:String, gridSize:BigDecimal, timeSpan:Int, sample:Double):Unit = {
-    val conf = new SparkConf().setAppName("Fu-Berlin")
-    val sc = new SparkContext(conf)
-    val cellOf = cellsFor(gridSize, timeSpan)
-    val taxiData = if(sample == 1) sc.textFile(inputDir) else sc.textFile(inputDir).sample(true, sample)
-    val trips = taxiData.map(skipErrors(parseTrip)).collect({case Some(t) => t})
-    val tripsWithCells = trips.map({(t) => (cellOf(t.pickup), t.passengerCount)})
-    val reducedCells = tripsWithCells.reduceByKey((a,b) => a + b)
-    reducedCells.map {case ((x,y,t), passengers) => s"$x, $y, $t, $passengers"}.saveAsTextFile(outputFile)
+  def submit(sc:SparkContext,
+             inputDir:String,
+             outputDir:String,
+             gridSize:BigDecimal,
+             timeSpan:Int,
+             sample:Double):Unit = {
+    val taxiData = sc.loadTaxi(inputDir, sample)
+    taxiData.toCells(gridSize, timeSpan).saveAsTextFile(outputDir)
   }
 }
