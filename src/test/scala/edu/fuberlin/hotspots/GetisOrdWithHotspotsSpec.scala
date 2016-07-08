@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by Christian Windolf on 06.07.16.
   */
-class GetisOrdSpec extends SparkSpec with Matchers {
+class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
   def dist(p1:(Long, Long, Long), p2:(Long, Long, Long)) = {
     sqrt(pow(p1._1 - p2._1, 2) + pow(p1._2 - p2._2, 2) + pow(p1._3 - p2._3, 2))
   }
