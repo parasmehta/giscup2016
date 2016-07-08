@@ -2,20 +2,15 @@ package edu.fuberlin.hotspots
 
 import java.lang.Math.sqrt
 
-import geotrellis.spark.io.index.zcurve.Z3
-
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import org.apache.spark.rdd.RDD
 
 /**
   * Created by Christian Windolf on 01.07.16.
   */
 object GetisOrd {
-  type Cellid = (Long, Long, Long)
-
   def calculate(rawObservations:RDD[(Cellid, Int)]):RDD[(Cellid, Double)] = {
     val observations = rawObservations.setName("obervations").cache
-    val context = observations.context
     val stdDev = observations.values.stdev
     val mean = observations.values.mean
     val count = observations.count

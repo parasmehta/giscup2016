@@ -14,6 +14,7 @@ import edu.fuberlin.hotspots.GeoJsonProtocol._
   */
 package object hotspots {
   case class STPoint(location: Point, time: DateTime)
+  type Cellid = (Long, Long, Long)
 
   def cellsFor(cellSize:BigDecimal, timeStep: Int):STPoint => (Int, Int, Int) = {
     (point:STPoint) => {

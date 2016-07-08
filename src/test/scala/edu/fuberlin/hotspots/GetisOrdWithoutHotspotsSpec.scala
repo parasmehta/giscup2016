@@ -1,12 +1,13 @@
 package edu.fuberlin.hotspots
 
-import org.scalatest.Matchers
+import org.scalatest.{Ignore, Matchers}
 
 import scala.collection.mutable.ListBuffer
 
 /**
   * Created by Christian Windolf on 08.07.16.
   */
+@Ignore
 class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   def createTestData():Array[((Long, Long, Long), Int)] = {
     val data = new ListBuffer[((Long, Long, Long), Int)]()
