@@ -11,14 +11,16 @@ import org.apache.spark.rdd.RDD
   * Created by Christian Windolf on 01.07.16.
   */
 object GetisOrd {
-  def calculate(rawObservations:RDD[((Long, Long, Long), Int)]):RDD[((Long, Long, Long), Double)] = {
+  type Cellid = (Long, Long, Long)
+
+  def calculate(rawObservations:RDD[(Cellid, Int)]):RDD[(Cellid, Double)] = {
     val observations = rawObservations.setName("obervations").cache
     val context = observations.context
     val stdDev = observations.values.stdev
     val mean = observations.values.mean
     val count = observations.count
-    def getNeighbours(cellid:(Long, Long, Long)): Array[((Long, Long, Long), Int)] = {
-      val neighbours = new mutable.ListBuffer[(Long, Long, Long)]()
+    def getNeighbours(cellid:Cellid): Array[(Cellid, Int)] = {
+      val neighbours = new mutable.ListBuffer[Cellid]()
       for (x <- -1 to 1; y <- -1 to 1; t <- -1 to 1) {
         if (x != y || y != t || t != 0) {
           neighbours.append((x, y, t))
@@ -29,7 +31,7 @@ object GetisOrd {
       }}.collect({case (cellid, Some(v)) => (cellid, v)}).toArray
     }
 
-    def zValue(cell:((Long, Long, Long),Int)): Double = {
+    def zValue(cell:(Cellid, Int)): Double = {
       val (cellid, passengerCount) = cell
       val neighbours = getNeighbours(cellid)
       val radicant = (count * (neighbours.size + 1)) - Math.pow(neighbours.size + 1, 2.0)
