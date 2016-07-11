@@ -6,9 +6,37 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by Christian Windolf on 08.07.16.
   */
-case class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid){
+class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid) extends Serializable{
   def this(singleCell:(Cellid, Int), size: Int, base:Cellid) = {
     this(immutable.HashMap[Cellid, Int](singleCell), size, base)
+  }
+
+  def ++(other:SuperCell): SuperCell ={
+    assert(this.base == other.base)
+    new SuperCell(this.cells ++ other.cells, size,base)
+  }
+
+  def neighbours(cellid:Cellid): Seq[Int] = {
+    val (x, y, t) = cellid
+    val buffer = ListBuffer[Int]()
+    for(xO <- -1 to 1; yO <- -1 to 1; tO <- -1 to 1){
+      (xO, yO, tO) match {
+        case (0, 0, 0) => ;
+        case _ => cells.get((x + xO, y + yO, t + tO)) match{
+          case Some(value) => buffer.append(value)
+          case _ => ;
+        }
+      }
+    }
+    buffer.toSeq
+  }
+
+  def coreCells:Seq[(Cellid, Int)] = {
+    val buffer = ListBuffer[(Cellid, Int)]()
+    for(x <- base._1 until base._1 + size; y <- base._2 until base._2 + size; t <- base._3 until base._3 + size){
+      cells.get(x, y, t) match{ case Some(value) => buffer.append(((x, y, t), value)) case None => }
+    }
+    buffer.toSeq
   }
 }
 
