@@ -18,7 +18,7 @@ object SparkHelpers {
     def loadTaxi(inputDir:String, sample:Double=1): RDD[Trip] = {
       val taxiData = load(inputDir, sample)
       val trips = taxiData.map(skipErrors(parseTrip)).collect({case Some(t) => t})
-      trips.filter((t)=>boroughOf(t.pickup.location).isDefined)
+      trips.filter((t)=>boroughOf(t.dropoff.location).isDefined)
     }
 
     def debugLoadTaxi(inputDir:String, sample:Double=1): RDD[Either[Trip,(String, Exception)]] = {
