@@ -9,7 +9,6 @@ import org.scalatest.fixture
 class SparkSpec extends fixture.FlatSpec {
   case class FixtureParam(context:SparkContext)
   override def withFixture(test:OneArgTest): Outcome ={
-    println("set up")
     val conf = new SparkConf().setAppName("Test").setMaster("local")
     val sc = new SparkContext(conf)
     try{withFixture(test.toNoArgTest(FixtureParam(sc)))}
