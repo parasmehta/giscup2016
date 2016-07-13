@@ -15,7 +15,7 @@ package object hotspots {
 
   type Cellid = (Long, Long, Long)
 
-  def cellsFor(cellSize:BigDecimal, timeStep: Int):Point => (Long, Long, Long) = {
+  def cellDeterminationBuilder(cellSize:BigDecimal, timeStep: Int):Point => (Long, Long, Long) = {
     (point:Point) => {
       ((point.longitude/cellSize).toLong, (point.latitude/cellSize).toLong, point.time.getDayOfYear.toLong / timeStep)
     }
