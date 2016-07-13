@@ -1,5 +1,6 @@
 package edu.fuberlin.hotspots
 
+import org.joda.time.DateTime
 import org.scalatest.{Ignore, Matchers}
 
 import scala.collection.mutable.ListBuffer
@@ -9,17 +10,17 @@ import scala.collection.mutable.ListBuffer
   */
 @Ignore
 class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
-  def createTestData():Array[((Long, Long, Long), Int)] = {
-    val data = new ListBuffer[((Long, Long, Long), Int)]()
+  def createTestData():Array[Trip] = {
+    val data = new ListBuffer[Trip]()
     for(x <- 1 to 100; y <- 1 to 100; t <- 1 to 100) {
       //create a stdev of 0.5 by using two alternating values
-      data.append(((x, y , t), t % 2))
+      data.append(Trip(Point(x, y , new DateTime(2015, 1, 1,0,0).plusDays(t)), t % 2))
     }
     data.toArray
   }
 
   it should "not return more items than the input" taggedAs(SparkSpec) in { f =>
-    GetisOrd.calculate(f.context.parallelize(createTestData)).count.toInt should be < 100 * 100 * 100
+    GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).count.toInt should be < 100 * 100 * 100
   }
 
   /*
@@ -30,7 +31,7 @@ class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   */
 
   it should "only have unique cell identifiers" taggedAs(SparkSpec) in { f=>
-    val results = GetisOrd.calculate(f.context.parallelize(createTestData)).collect.map(_._1)
+    val results = GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).collect.map(_._1)
     results.toSet.size shouldEqual results.size
   }
 }

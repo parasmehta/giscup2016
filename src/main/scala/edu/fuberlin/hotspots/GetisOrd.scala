@@ -4,6 +4,7 @@ import java.lang.Math.sqrt
 
 import scala.collection.mutable
 import org.apache.spark.rdd.RDD
+import edu.fuberlin.hotspots.SparkHelpers._
 
 import scala.collection.mutable.ListBuffer
 
@@ -11,13 +12,13 @@ import scala.collection.mutable.ListBuffer
   * Created by Christian Windolf on 01.07.16.
   */
 object GetisOrd {
-  def calculate(rawObservations:RDD[(Cellid, Int)]):RDD[(Cellid, Double)] = {
-    val observations = rawObservations.cache
+  def calculate(trips:RDD[Trip], cellSize:Any, timeSpan:Any):RDD[(Cellid, Double)] = {
+    val observations = trips.toCells(cellSize, timeSpan).cache
     val stdDev = observations.values.stdev
     val mean = observations.values.mean
     val count = observations.count
     val factory = new SuperCellFactory(25)
-    val superCells = rawObservations.flatMap(factory.create).reduceByKey((a, b) => a ++ b).values.cache
+    val superCells = observations.flatMap(factory.create).reduceByKey((a, b) => a ++ b).values.cache
     val zValue = zValueFunction(stdDev, mean, count)
     superCells.flatMap(zValue)
   }

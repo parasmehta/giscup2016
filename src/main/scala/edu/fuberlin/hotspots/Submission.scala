@@ -4,7 +4,6 @@ import java.math.BigDecimal
 
 import org.apache.spark.{SparkConf, SparkContext}
 import SparkHelpers._
-import org.apache.spark.rdd.RDD
 
 /**
   * Created by Christian Windolf on 29.06.16.
@@ -56,12 +55,11 @@ object Submission {
   def submit(sc:SparkContext,
              inputDir:String,
              outputDir:String,
-             gridSize:BigDecimal,
-             timeSpan:Int,
+             gridSize:Any,
+             timeSpan:Any,
              sample:Double):Unit = {
     val taxiData = sc.loadTaxi(inputDir, sample)
-    val cells = taxiData.toCells(gridSize, timeSpan)
-    val zvalues = GetisOrd.calculate(cells)
+    val zvalues = GetisOrd.calculate(taxiData, gridSize, timeSpan)
     val output = zvalues.sortBy(_._2, false).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}")
     output.saveAsTextFile(outputDir)
   }
