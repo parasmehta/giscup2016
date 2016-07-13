@@ -11,16 +11,17 @@ class SuperCellSpec extends FlatSpec with Matchers {
   for(x <- 1 to 10; y <- 1 to 10; t <- 1 to 10){
     map.put((x, y, t), 1)
   }
-  val sc = new SuperCell(map.toMap, 10, (1L, 1L, 1L))
+  val sc = new SuperCell(map.toMap, 8, (1L, 1L, 1L))
 
   it should "find 26 neighbours" in {
     sc.neighbours((5,5,5)) should have size 26
   }
 
   it should "have the correct values" in {
-    for(pc <- sc.neighbours((5,5,5))){
-      pc shouldBe 1
-    }
+    all(sc.neighbours((5, 5, 5))) shouldBe 1
   }
 
+  it should "find all 512 core cells" in {
+    sc.coreCells should have size 512
+  }
 }
