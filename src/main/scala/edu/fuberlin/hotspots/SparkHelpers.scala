@@ -37,7 +37,12 @@ object SparkHelpers {
   }
 
   implicit class RichTrips(trips:RDD[Trip]) {
-    def toCells(gridSize:BigDecimal = new BigDecimal("0.001"), timeSpan:Int = 1):RDD[(Cellid, Int)] = {
+    def toCells(gs:Any, ts:Any):RDD[(Cellid, Int)] = {
+      val gridSize = gs match{
+        case s:String => new BigDecimal(s)
+        case bd:BigDecimal => bd
+        case d:Double => new BigDecimal(d)}
+      val timeSpan = ts match{ case s:String => s.toInt case i:Int => i }
       val cellOf = cellDeterminationBuilder(gridSize, timeSpan)
       val cellsWithPassengers = trips.map({(t) => (cellOf(t.dropoff), t.passengerCount)})
       cellsWithPassengers.reduceByKey((a,b) => a + b)
