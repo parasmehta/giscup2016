@@ -4,6 +4,7 @@ import java.math.BigDecimal
 
 import org.apache.spark.{SparkConf, SparkContext}
 import SparkHelpers._
+import org.apache.spark.rdd.RDD
 
 /**
   * Created by Christian Windolf on 29.06.16.
@@ -59,6 +60,8 @@ object Submission {
              timeSpan:Int,
              sample:Double):Unit = {
     val taxiData = sc.loadTaxi(inputDir, sample)
-    taxiData.toCells(gridSize, timeSpan).saveAsTextFile(outputDir)
+    val cells = taxiData.toCells(gridSize, timeSpan)
+    val output = GetisOrd.calculate(cells)
+    output.saveAsTextFile(outputDir)
   }
 }

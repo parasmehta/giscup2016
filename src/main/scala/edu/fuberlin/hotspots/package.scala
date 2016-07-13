@@ -16,9 +16,9 @@ package object hotspots {
   case class STPoint(location: Point, time: DateTime)
   type Cellid = (Long, Long, Long)
 
-  def cellsFor(cellSize:BigDecimal, timeStep: Int):STPoint => (Int, Int, Int) = {
+  def cellsFor(cellSize:BigDecimal, timeStep: Int):STPoint => (Long, Long, Long) = {
     (point:STPoint) => {
-      ((point.location.getX/cellSize).toInt, (point.location.getY/cellSize).toInt, point.time.getDayOfYear)
+      ((point.location.getX/cellSize).toLong, (point.location.getY/cellSize).toLong, point.time.getDayOfYear.toLong)
     }
   }
 
@@ -35,8 +35,8 @@ package object hotspots {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
     val fields = line.split(",")
     val vendorID = fields(0).toInt
-    val pickup = new STPoint(new Point(fields(5).toDouble, fields(6).toDouble), new DateTime(format.parse(fields(1))))
-    val dropoff = new STPoint(new Point(fields(9).toDouble, fields(10).toDouble), new DateTime(format.parse(fields(2))))
+    val pickup = STPoint(new Point(fields(5).toDouble, fields(6).toDouble), new DateTime(format.parse(fields(1))))
+    val dropoff = STPoint(new Point(fields(9).toDouble, fields(10).toDouble), new DateTime(format.parse(fields(2))))
     val passengerCount = fields(3).toInt
     val tripDistance = fields(4).toDouble
     Trip(vendorID, pickup, dropoff, passengerCount, tripDistance)

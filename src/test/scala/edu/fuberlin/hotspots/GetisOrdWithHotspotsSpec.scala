@@ -9,7 +9,6 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by Christian Windolf on 06.07.16.
   */
-@Ignore
 class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
   def dist(p1:(Long, Long, Long), p2:(Long, Long, Long)) = {
     sqrt(pow(p1._1 - p2._1, 2) + pow(p1._2 - p2._2, 2) + pow(p1._3 - p2._3, 2))
@@ -20,11 +19,11 @@ class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
     //default 20
     //one hotspt at 10,10,10
     // big hotspot at 65,35,50
-    for(x <- 1 to 100; y <- 1 to 100; t <- 1 to 100) {
+    for(x <- -100 to -1; y <- 1 to 100; t <- 1 to 100) {
       data.append((x,y,t) match {
-        case (10,10,10) => ((10,10,10),40)
-        case (x,y,t) if((60 to 70 contains x) && (30 to 40 contains y) && (45 to 55 contains t)) => {
-          ((x,y,t), 35 - dist((x,y,t), (65,35, 50)).toInt)
+        case (-10, 10, 10) => ((-10, 10, 10),40)
+        case (x,y,t) if((-70 to -60 contains x) && (30 to 40 contains y) && (45 to 55 contains t)) => {
+          ((x,y,t), 35 - dist((x,y,t), (-65, 35, 50)).toInt)
         }
         case (x,y,t) => ((x,y,t), 20)
       })
@@ -37,13 +36,13 @@ class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
     val resultRDD = GetisOrd.calculate(testRDD).cache
     val results = resultRDD.collect.toMap
     val mean = resultRDD.values.mean
-    results((10, 10, 10)) should be > mean
+    results((-10, 10, 10)) should be > mean
   }
 
   it should "should be able to determine which spot is hotter" in { f =>
     val testRDD = f.context.parallelize(createTestData())
     val results = GetisOrd.calculate(testRDD).collect.toMap
-    results((65, 35, 50)) should be > results((10,10,10))
+    results((-65, 35, 50)) should be > results((-10,10,10))
   }
 }
 

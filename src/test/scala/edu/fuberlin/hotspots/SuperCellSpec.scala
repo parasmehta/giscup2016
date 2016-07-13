@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 /**
   * Created by Christian Windolf on 11.07.16.
   */
-class NeighbourhoodSpec extends FlatSpec with Matchers {
+class SuperCellSpec extends FlatSpec with Matchers {
   val map = new mutable.HashMap[Cellid, Int]
   for(x <- 1 to 10; y <- 1 to 10; t <- 1 to 10){
     map.put((x, y, t), 1)
