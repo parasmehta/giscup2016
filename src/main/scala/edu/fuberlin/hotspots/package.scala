@@ -3,31 +3,30 @@ package edu.fuberlin
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-import com.esri.core.geometry.Point
 import org.joda.time.{DateTime, Duration}
-import spray.json._
-import edu.fuberlin.hotspots.GeoHelpers._
-import edu.fuberlin.hotspots.GeoJsonProtocol._
 
 /**
   * Created by Christian Windolf on 24.06.16.
   */
 package object hotspots {
-  case class STPoint(location: Point, time: DateTime)
+  case class Point(val longitude: Double, val latitude:Double, val time: DateTime){
+    def insideNYC = latitude >= 40.5d && latitude <= 40.9d && longitude >= -74.25d && longitude <= -73.7
+  }
+
   type Cellid = (Long, Long, Long)
 
-  def cellsFor(cellSize:BigDecimal, timeStep: Int):STPoint => (Long, Long, Long) = {
-    (point:STPoint) => {
-      ((point.location.getX/cellSize).toLong, (point.location.getY/cellSize).toLong, point.time.getDayOfYear.toLong)
+  def cellsFor(cellSize:BigDecimal, timeStep: Int):Point => (Long, Long, Long) = {
+    (point:Point) => {
+      ((point.longitude/cellSize).toLong, (point.latitude/cellSize).toLong, point.time.getDayOfYear.toLong / timeStep)
     }
   }
 
-  case class Trip(dropoff: STPoint, passengerCount: Int)
+  case class Trip(dropoff: Point, passengerCount: Int)
 
   def parseTrip(line: String): Trip = {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
     val fields = line.split(",")
-    val dropoff = STPoint(new Point(fields(9).toDouble, fields(10).toDouble), new DateTime(format.parse(fields(2))))
+    val dropoff = Point(fields(9).toDouble, fields(10).toDouble, new DateTime(format.parse(fields(2))))
     val passengerCount = fields(3).toInt
     Trip(dropoff, passengerCount)
   }
@@ -48,18 +47,5 @@ package object hotspots {
         Some(f(input))
       } catch{case e:Exception => None}
     }
-  }
-
-  def readNYCBoroughs(src: scala.io.Source): Seq[Feature] = {
-    val jsObj = src.mkString.parseJson.asJsObject
-    val features = jsObj.fields("features").asInstanceOf[JsArray]
-    features.elements.map(_.convertTo[Feature])
-  }
-
-  lazy val boroughs = readNYCBoroughs(scala.io.Source.fromURL(getClass().getResource("/nyc-boroughs.geojson")))
-
-  def boroughOf(p: Point) = boroughs.find(_.geometry.contains(p)) match {
-    case Some(b) => Some(b.borough)
-    case None => None
   }
 }
