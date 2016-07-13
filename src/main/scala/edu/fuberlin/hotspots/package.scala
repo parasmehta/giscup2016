@@ -22,24 +22,14 @@ package object hotspots {
     }
   }
 
-  case class Trip(vendorID: Int, pickup: STPoint, dropoff: STPoint, passengerCount: Int, tripDistance: Double) {
-    if(pickup.time.isAfter(dropoff.time)) {
-      throw new IllegalArgumentException(s"pickup time at ${pickup.time} was before dropoff time at ${dropoff.time}")
-    }
-    if(new Duration(pickup.time, dropoff.time).getStandardHours > 4) {
-      throw new IllegalArgumentException(s"There were more than four hours between pickup and dropoff time")
-    }
-  }
+  case class Trip(dropoff: STPoint, passengerCount: Int)
 
   def parseTrip(line: String): Trip = {
     val format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
     val fields = line.split(",")
-    val vendorID = fields(0).toInt
-    val pickup = STPoint(new Point(fields(5).toDouble, fields(6).toDouble), new DateTime(format.parse(fields(1))))
     val dropoff = STPoint(new Point(fields(9).toDouble, fields(10).toDouble), new DateTime(format.parse(fields(2))))
     val passengerCount = fields(3).toInt
-    val tripDistance = fields(4).toDouble
-    Trip(vendorID, pickup, dropoff, passengerCount, tripDistance)
+    Trip(dropoff, passengerCount)
   }
 
   def saveErrors[I, O](f:I => O): I => Either[O, (I, Exception)] = {
