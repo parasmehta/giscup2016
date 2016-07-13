@@ -9,7 +9,7 @@ import org.joda.time.{DateTime, Duration}
   * Created by Christian Windolf on 24.06.16.
   */
 package object hotspots {
-  case class Point(val longitude: Double, val latitude:Double, val time: DateTime){
+  case class Point(longitude: Double, latitude:Double, time: DateTime){
     def insideNYC = latitude >= 40.5d && latitude <= 40.9d && longitude >= -74.25d && longitude <= -73.7
   }
 
