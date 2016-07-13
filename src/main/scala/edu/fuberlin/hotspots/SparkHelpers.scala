@@ -2,7 +2,6 @@ package edu.fuberlin.hotspots
 
 import java.math.BigDecimal
 
-import geotrellis.spark.io.index.zcurve.Z3
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 
@@ -42,17 +41,6 @@ object SparkHelpers {
       val cellOf = cellsFor(gridSize, timeSpan)
       val cellsWithPassengers = trips.map({(t) => (cellOf(t.pickup), t.passengerCount)})
       cellsWithPassengers.reduceByKey((a,b) => a + b)
-    }
-  }
-
-  implicit class RichCells(cells:RDD[((Int, Int, Int), Int)]) {
-    def reindex = {
-      val minX = cells.keys.map(_._1).min
-      val minY = cells.keys.map(_._2).min
-      val minT = cells.keys.map(_._3).min
-      cells.map((cell:((Int, Int, Int), Int)) => {
-        (Z3(cell._1._1 - minX, cell._1._2 - minY, cell._1._3 - minT).z, cell._2)
-      })
     }
   }
 }
