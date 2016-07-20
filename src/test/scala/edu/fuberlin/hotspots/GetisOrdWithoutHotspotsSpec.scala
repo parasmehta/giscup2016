@@ -1,14 +1,13 @@
 package edu.fuberlin.hotspots
 
 import org.joda.time.DateTime
-import org.scalatest.{Ignore, Matchers}
+import org.scalatest.Matchers
 
 import scala.collection.mutable.ListBuffer
 
 /**
   * Created by Christian Windolf on 08.07.16.
   */
-@Ignore
 class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   def createTestData():Array[Trip] = {
     val data = new ListBuffer[Trip]()

@@ -10,3 +10,5 @@ libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % "1.6.0" % "provided"
+parallelExecution in Test := false
+

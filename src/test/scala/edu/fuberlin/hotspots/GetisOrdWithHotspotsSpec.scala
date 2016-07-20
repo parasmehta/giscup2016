@@ -3,7 +3,7 @@ package edu.fuberlin.hotspots
 import java.lang.Math.{pow, sqrt}
 
 import org.joda.time.DateTime
-import org.scalatest.{Ignore, Matchers}
+import org.scalatest.Matchers
 
 import scala.collection.mutable.ListBuffer
 
