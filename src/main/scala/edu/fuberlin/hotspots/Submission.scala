@@ -38,6 +38,9 @@ object Submission {
 
     val sample = args.lift(4).getOrElse("1").toDouble
     val conf = new SparkConf().setAppName("Fu-Berlin")
+    conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+    conf.registerKryoClasses(Array(classOf[Trip], classOf[SuperCell],
+      classOf[Option[Trip]], classOf[(Cellid, Int)], classOf[(Cellid, Double)]))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan, sample)
   }
