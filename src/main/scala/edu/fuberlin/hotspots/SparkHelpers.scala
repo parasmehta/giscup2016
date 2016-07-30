@@ -11,7 +11,7 @@ import org.apache.spark.rdd.RDD
 object SparkHelpers {
   implicit class RichContext(sc:SparkContext) {
     private def load(inputDir:String, sample:Double): RDD[String] = {
-      if(sample == 1) sc.textFile(inputDir) else sc.textFile(inputDir).sample(true, sample)
+      if(sample == 1) sc.textFile(inputDir) else sc.textFile(inputDir).sample(false, sample)
     }
 
     def loadTaxi(inputDir:String, sample:Double=1): RDD[Trip] = {
