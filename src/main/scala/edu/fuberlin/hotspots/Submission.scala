@@ -40,8 +40,11 @@ object Submission {
     val conf = new SparkConf().setAppName("Fu-Berlin")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryo.registrationRequired", "true")
-    conf.registerKryoClasses(Array(classOf[Trip], classOf[SuperCell],
-      classOf[Option[Trip]], classOf[(Cellid, Int)], classOf[(Cellid, Double)]))
+    conf.registerKryoClasses(Array(classOf[Trip], classOf[SuperCell], classOf[SuperCellFactory],
+      classOf[Option[Trip]], classOf[(Cellid, Int)], classOf[(Cellid, Double)],
+      classOf[Array[Double]], classOf[org.apache.spark.util.StatCounter],
+      classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]]
+    ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan, sample)
   }
@@ -52,7 +55,7 @@ object Submission {
     println("  path/to/jar \\")
     println("  {hdfs,file,}://path/to/input_directory \\")
     println("  {hdfs,file,}://path/to/output_file \\")
-    println("  {spatial gridsize in degrees (0.001 for example)}\\")
+    println("  {spatial gridsize in degrees (0.001 for example)} \\")
     println("  {temporal gridsize in days} (1 for example)")
   }
 
