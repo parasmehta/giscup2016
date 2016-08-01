@@ -1,6 +1,5 @@
 package edu.fuberlin.hotspots
 
-import org.joda.time.{DateTime, Duration}
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
 
 /**

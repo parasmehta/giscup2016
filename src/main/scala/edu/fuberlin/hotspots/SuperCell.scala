@@ -1,6 +1,5 @@
 package edu.fuberlin.hotspots
 
-import scala.collection.immutable
 import scala.collection.mutable.ListBuffer
 
 /**

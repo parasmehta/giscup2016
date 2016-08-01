@@ -22,13 +22,6 @@ class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
     GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).count.toInt should be <= 100 * 100 * 100
   }
 
-  /*
-  it should "give every cell the same value" taggedAs(SparkSpec) in { f =>
-    val results = GetisOrd.calculate(f.context.parallelize(createTestData)).collect.toMap
-    all(results.values) shouldEqual 1.0 +- 0.1
-  }
-  */
-
   it should "only have unique cell identifiers" taggedAs(SparkSpec) in { f=>
     val results = GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).collect.map(_._1)
     results.toSet.size shouldEqual results.size

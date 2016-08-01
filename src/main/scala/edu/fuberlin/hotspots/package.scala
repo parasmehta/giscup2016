@@ -3,7 +3,7 @@ package edu.fuberlin
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-import org.joda.time.{DateTime, Duration}
+import org.joda.time.DateTime
 
 /**
   * Created by Christian Windolf on 24.06.16.

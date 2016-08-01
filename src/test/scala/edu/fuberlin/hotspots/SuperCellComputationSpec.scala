@@ -1,11 +1,11 @@
 package edu.fuberlin.hotspots
 
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
   * Created by Christian Windolf on 08.07.16.
   */
-class SuperCellComputationSpec extends FlatSpec with Matchers with BeforeAndAfter{
+class SuperCellComputationSpec extends FlatSpec with Matchers{
   val superCellFactory = new SuperCellFactory(10)
 
   it should "return one SuperCell for a cell in the middle" in {

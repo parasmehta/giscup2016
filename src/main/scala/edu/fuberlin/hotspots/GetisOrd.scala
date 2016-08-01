@@ -2,7 +2,6 @@ package edu.fuberlin.hotspots
 
 import java.lang.Math.sqrt
 
-import scala.collection.mutable
 import org.apache.spark.rdd.RDD
 import edu.fuberlin.hotspots.SparkHelpers._
 
