@@ -19,7 +19,7 @@ class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   }
 
   it should "not return more items than the input" taggedAs(SparkSpec) in { f =>
-    GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).count.toInt should be < 100 * 100 * 100
+    GetisOrd.calculate(f.context.parallelize(createTestData), 1.0d, 1).count.toInt should be <= 100 * 100 * 100
   }
 
   /*

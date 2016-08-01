@@ -7,15 +7,6 @@ import scala.collection.mutable.ListBuffer
   * Created by Christian Windolf on 08.07.16.
   */
 class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid) extends Serializable{
-  def this(singleCell:(Cellid, Int), size: Int, base:Cellid) = {
-    this(immutable.HashMap[Cellid, Int](singleCell), size, base)
-  }
-
-  def ++(other:SuperCell): SuperCell ={
-    assert(this.base == other.base)
-    new SuperCell(this.cells ++ other.cells, size,base)
-  }
-
   def neighbours(cellid:Cellid): Seq[Int] = {
     val (x, y, t) = cellid
     val buffer = ListBuffer[Int]()
@@ -36,7 +27,7 @@ class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid) exten
     for(x <- base._1 until base._1 + size; y <- base._2 until base._2 + size; t <- base._3 until base._3 + size){
       cells.get(x, y, t) match{ case Some(value) => buffer.append(((x, y, t), value)) case None => }
     }
-    buffer.toSeq
+    buffer
   }
 }
 
@@ -48,8 +39,7 @@ class SuperCellFactory(val size:Int) extends Serializable {
   }
 
   private def superID(cellID:Cellid):Cellid = {
-    val baseCoords = base(cellID)
-    (baseCoords._1 / size, baseCoords._2 / size, baseCoords._3 / size)
+    (cellID._1 - ((size + cellID._1 % size) % 10), (cellID._2 - (cellID._2 % size)), cellID._3 - (cellID._3 % size))
   }
 
   private def offsets(coordinate:Long):Seq[Int] = {
@@ -60,15 +50,14 @@ class SuperCellFactory(val size:Int) extends Serializable {
     }
   }
 
-  def create(cell:(Cellid, Int)): Array[(Cellid, SuperCell)] = {
-    val mainCell = Seq[(Cellid, SuperCell)]((superID(cell._1), new SuperCell(cell, size, base(cell._1))))
+  def create(cell:(Cellid, Int)): Seq[(Cellid, (Cellid, Int))] = {
     val (x, y, t) = cell._1
     val (offX, offY, offT) = (offsets((x % size) + size), offsets(y), offsets(t))
-    val buffer:ListBuffer[(Cellid, SuperCell)] = new ListBuffer[(Cellid, SuperCell)]()
+    val buffer = new ListBuffer[(Cellid, (Cellid, Int))]()
     for(oX <- offX; oY <- offY; oT <- offT){
-      val pseudoCellID = (x + oX, y + oY, t + oT)
-      buffer.append((superID(pseudoCellID), new SuperCell(cell, size, base(pseudoCellID))))
+      val pseudoCellID = (x + (oX * size), y + (oY * size), t + (oT * size))
+      buffer.append((superID(pseudoCellID), cell))
     }
-    buffer.toArray
+    buffer.toSeq
   }
 }
