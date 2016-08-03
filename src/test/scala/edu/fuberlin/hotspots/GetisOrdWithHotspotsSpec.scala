@@ -36,15 +36,15 @@ class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
   it should "find the second hottest zone" in { f =>
     val testRDD = f.context.parallelize(createTestData())
     val resultRDD = GetisOrd.calculate(testRDD, 1.0d, 1).cache
-    val results = resultRDD.collect.toMap
-    val mean = resultRDD.values.mean
-    results((-10, 10, 10)) should be > mean
+    val results = resultRDD.map(c => (c._1, (c._2, c._3))).collect.toMap
+    val mean = resultRDD.map(_._2).mean
+    results((-10, 10, 10))._1 should be > mean
   }
 
   it should "should be able to determine which spot is hotter" in { f =>
     val testRDD = f.context.parallelize(createTestData())
-    val results = GetisOrd.calculate(testRDD, 1.0d, 1).collect.toMap
-    results((-65, 35, 50)) should be > results((-10,10,10))
+    val results = GetisOrd.calculate(testRDD, 1.0d, 1).map(c => (c._1, (c._2, c._3))).collect.toMap
+    results((-65, 35, 50))._1 should be > results((-10,10,10))._1
   }
 }
 

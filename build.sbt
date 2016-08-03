@@ -4,6 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.10.5"
 
+libraryDependencies += "org.apache.commons" % "commons-math3" % "3.0"
 libraryDependencies += "joda-time" % "joda-time" % "2.9.4"
 libraryDependencies += "org.joda" % "joda-convert" % "1.8"
 libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"

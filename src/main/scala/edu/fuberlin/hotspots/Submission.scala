@@ -67,7 +67,7 @@ object Submission {
              sample:Double):Unit = {
     val taxiData = sc.loadTaxi(inputDir, sample)
     val zvalues = GetisOrd.calculate(taxiData, gridSize, timeSpan)
-    val output = zvalues.sortBy(_._2, false).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}")
+    val output = zvalues.sortBy(_._2, false).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     output.saveAsTextFile(outputDir)
   }
 }
