@@ -2,7 +2,6 @@ package edu.fuberlin.hotspots
 
 import java.lang.Math.{pow, sqrt}
 
-import org.joda.time.DateTime
 import org.scalatest.Matchers
 
 import scala.collection.mutable.ListBuffer
@@ -22,12 +21,12 @@ class GetisOrdWithHotspotsSpec extends SparkSpec with Matchers {
     // big hotspot at 65,35,50
     for(x <- -100 to -1; y <- 1 to 100; t <-0 until 100) {
       data.append((x,y,t) match {
-        case (-10, 10, 10) => Trip(Point(-10 - .2d, 10.2d, new DateTime(2015, 1, 10, 0, 0)), 40)
+        case (-10, 10, 10) => Trip(Point(-10 - .2d, 10.2d, 10), 40)
         case (x,y,t) if((-70 to -60 contains x) && (30 to 40 contains y) && (45 to 55 contains t)) => {
-          val point = Point(x - 0.2,y + 0.2, new DateTime(2015, 1, 1, 0, 0).plusDays(t))
+          val point = Point(x - 0.2,y + 0.2, t)
           Trip(point, 35 - dist((x,y,t), (-65, 35, 50)).toInt)
         }
-        case (x, y, t) => Trip(Point(x - .2,y + .2, new DateTime(2015,1,1,0,0).plusDays(t)), 20)
+        case (x, y, t) => Trip(Point(x - .2,y + .2, t), 20)
       })
     }
     data.toArray
