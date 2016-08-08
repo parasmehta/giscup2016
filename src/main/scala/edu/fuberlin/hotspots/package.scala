@@ -1,10 +1,5 @@
 package edu.fuberlin
 
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-import org.joda.time.DateTime
-
 import scala.util.matching.Regex
 
 /**
