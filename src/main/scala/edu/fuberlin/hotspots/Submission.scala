@@ -46,22 +46,12 @@ object Submission {
       classOf[Option[Trip]], classOf[(Cellid, Int)], classOf[(Cellid, Double)],
       classOf[Array[Double]], classOf[org.apache.spark.util.StatCounter],
       classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]],
-      ordering.getClass, classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]]
+      classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]],
+      classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
+      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$2"), Class.forName("scala.math.Ordering$Double$")
     ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan, sample)
-  }
-
-  implicit val ordering = new Ordering[(Cellid, Double, Double)]{
-    override def compare(a:(Cellid, Double, Double), b:(Cellid, Double, Double)):Int = {
-      if(a._2 == b._2){
-        return 0
-      } else if(a._2 < b._2){
-        return -1
-      } else{
-        return 1
-      }
-    }
   }
 
   def printHelp = {
@@ -82,7 +72,7 @@ object Submission {
              sample:Double):Unit = {
     val taxiData = sc.loadTaxi(inputDir, sample)
     val zvalues = GetisOrd.calculate(taxiData, gridSize, timeSpan)
-    val output = zvalues.top(50).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
+    val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
       case "hdfs" => {
         val fs = FileSystem.get(sc.hadoopConfiguration)
