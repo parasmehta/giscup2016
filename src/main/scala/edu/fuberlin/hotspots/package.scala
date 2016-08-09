@@ -7,16 +7,10 @@ import scala.util.matching.Regex
   */
 package object hotspots {
   case class Point(longitude: Double, latitude: Double, time: Int){
-    def insideNYC = latitude >= 40.5d && latitude <= 40.9d && longitude >= -74.25d && longitude <= -73.7
+    def insideNYC = latitude >= 40.5d && latitude <= 40.9d && longitude >= -74.25d && longitude <= -73.7d
   }
 
-  type Cellid = (Long, Long, Long)
-
-  def cellDeterminationBuilder(cellSize:BigDecimal, timeStep: Int):Point => (Long, Long, Long) = {
-    (point:Point) => {
-      ((point.longitude/cellSize).toLong, (point.latitude/cellSize).toLong, point.time / timeStep)
-    }
-  }
+  type Cellid = (Int, Int, Int)
 
   case class Trip(dropoff: Point, passengerCount: Int)
 

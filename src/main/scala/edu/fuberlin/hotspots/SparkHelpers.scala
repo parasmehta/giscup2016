@@ -38,13 +38,14 @@ object SparkHelpers {
 
   implicit class RichTrips(trips:RDD[Trip]) {
     def toCells(gs:Any, ts:Any):RDD[(Cellid, Int)] = {
-      val gridSize = gs match{
-        case s:String => new BigDecimal(s)
-        case bd:BigDecimal => bd
-        case d:Double => new BigDecimal(d)}
+      val gridSize = gs match{ case s:String => s.toDouble case d:Double => d}
       val timeSpan = ts match{case s:String => s.toInt case i:Int => i}
-      val cellOf = cellDeterminationBuilder(gridSize, timeSpan)
-      val cellsWithPassengers = trips.map({(t) => (cellOf(t.dropoff), t.passengerCount)})
+      val cellsWithPassengers = trips.map((t) =>{
+        (((t.dropoff.longitude / gridSize).toInt,
+          (t.dropoff.latitude / gridSize).toInt,
+          t.dropoff.time / timeSpan),
+          t.passengerCount)
+      })
       cellsWithPassengers.reduceByKey((a,b) => a + b)
     }
   }

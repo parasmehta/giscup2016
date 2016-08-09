@@ -12,7 +12,7 @@ class GetisOrdSpec extends FlatSpec with Matchers {
   for(x <- 0 to 5; y <- 0 to 5; t <- 0 to 5){
     map.put((x, y, t), 1)
   }
-  val sc = new SuperCell(map.toMap, 4, (1L, 1L, 1L))
+  val sc = new SuperCell(map.toMap, 4, (1, 1, 1))
 
   val zValues = GetisOrd.zValueFunction(.5d, .5d, 216)
 

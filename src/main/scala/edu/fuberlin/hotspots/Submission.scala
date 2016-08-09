@@ -19,24 +19,10 @@ object Submission {
     }
 
     val inputDirectory = args(0)
-
     val outputFile = args(1)
 
-    val gridSize = try {new BigDecimal(args(2))} catch {
-      case e:NumberFormatException => {
-        println(s"'${args(2)}' is not a valid grid size")
-        printHelp
-        return
-      }
-    }
-
-    val timeSpan = try {args(3).toInt} catch {
-      case e:NumberFormatException => {
-        println(s"Invalid values for day. '${args(3)}' is cannot be converted to an integer")
-        printHelp
-        return
-      }
-    }
+    val gridSize = args(2)
+    val timeSpan = args(3)
 
     val sample = args.lift(4).getOrElse("1").toDouble
     val conf = new SparkConf().setAppName("Fu-Berlin")
