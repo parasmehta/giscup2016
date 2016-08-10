@@ -37,11 +37,11 @@ object SparkHelpers {
   }
 
   implicit class RichTrips(trips:RDD[Trip]) {
-    def toCells(gs:Any, ts:Any):RDD[(Cellid, Int)] = {
+    def toCells(gs:Any, ts:Any):RDD[(Int, Int)] = {
       val gridSize = gs match{ case s:String => s.toDouble case d:Double => d}
       val timeSpan = ts match{case s:String => s.toInt case i:Int => i}
       val cellsWithPassengers = trips.map((t) =>{
-        (((t.longitude / gridSize).toInt,
+        (compose((t.longitude / gridSize).toInt,
           (t.latitude / gridSize).toInt,
           t.dayOfYear / timeSpan),
           t.passengerCount)

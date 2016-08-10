@@ -26,6 +26,9 @@ package object hotspots {
     Trip(fields(9).toDouble, fields(10).toDouble, t, passengerCount)
   }
 
+  def compose(c:Cellid):Int = (c._1 + 74300) * 1000000 + (c._2 - 40500) * 1000 + c._3
+  def decompose(k:Int):Cellid = ((k / 1000000) - 74300, ((k % 1000000) / 1000 + 40500), k % 1000)
+
   def saveErrors[I, O](f:I => O): I => Either[O, (I, Exception)] = {
     {(input) =>
       try {

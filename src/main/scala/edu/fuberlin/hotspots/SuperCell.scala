@@ -8,8 +8,8 @@ import scala.collection.mutable.ListBuffer
   * Created by Christian Windolf on 08.07.16.
   */
 class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Serializable{
-  def this(cellSeq:Seq[(Cellid, Int)], size: Int, base:Cellid){
-    this(new Int2IntAVLTreeMap(cellSeq.map(c => SuperCell.flatKey(c._1)).toArray, cellSeq.map(_._2).toArray), size, base)
+  def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int){
+    this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, decompose(base))
   }
   def neighbours(cellid:Cellid): Seq[Int] = {
     val (x, y, t) = cellid
@@ -37,15 +37,8 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
   }
 
   def get(x:Int, y:Int, t:Int):Int = {
-    val key = (x + 74200) * 100000 + (y - 40500) * 1000 + t
+    val key = compose(x, y, t)
     cells.containsKey(key) match { case true => cells.get(key) case false => -1 }
-  }
-}
-
-object SuperCell{
-  def flatKey(c:Cellid):Int = {
-    val (x,y,t) = c
-    (x + 74200) * 100000 + (y - 40500) * 1000 + t
   }
 }
 
@@ -68,13 +61,13 @@ class SuperCellFactory(val size:Int) extends Serializable {
     }
   }
 
-  def create(cell:(Cellid, Int)): Seq[(Cellid, (Cellid, Int))] = {
-    val (x, y, t) = cell._1
+  def create(cell:(Int, Int)): Seq[(Int, (Int, Int))] = {
+    val (x, y, t) = decompose(cell._1)
     val (offX, offY, offT) = (offsets((x % size) + size), offsets(y), offsets(t))
-    val buffer = new ListBuffer[(Cellid, (Cellid, Int))]()
+    val buffer = new ListBuffer[(Int, (Int, Int))]()
     for(oX <- offX; oY <- offY; oT <- offT){
       val pseudoCellID = (x + (oX * size), y + (oY * size), t + (oT * size))
-      buffer.append((superID(pseudoCellID), cell))
+      buffer.append((compose(superID(pseudoCellID)), cell))
     }
     buffer.toSeq
   }
