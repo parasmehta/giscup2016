@@ -20,25 +20,20 @@ object GetisOrd {
     val stdDev = observations.values.stdev
     val mean = observations.values.mean
     val count = observations.count
+    val norm = new NormalDistribution()
     val factory = new SuperCellFactory(superCellSize)
     val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2, superCellSize, c._1))
-    val zValue = zValueFunction(stdDev, mean, count)
-    superCells.flatMap(zValue)
-  }
-
-  def zValueFunction(stdev:Double, mean:Double, n:Long):SuperCell => Seq[(Cellid, Double, Double)] = {
-        val norm = new NormalDistribution()
-    (superCell:SuperCell) => {
+    superCells.flatMap(superCell => {
       val buffer = new ListBuffer[(Cellid, Double, Double)]
       for((cellid, passengerCount) <- superCell.coreCells){
         val neighbours = superCell.neighbours(cellid)
-        val radicant = ((n * (neighbours.size + 1)) - Math.pow(neighbours.size + 1, 2.0)) / (n - 1)
-        val denominator = stdev * sqrt(radicant)
+        val radicant = ((count * (neighbours.size + 1)) - Math.pow(neighbours.size + 1, 2.0)) / (count - 1)
+        val denominator = stdDev * sqrt(radicant)
         val numerator = neighbours.sum + passengerCount - (mean * (neighbours.size + 1))
         val zValue = numerator / denominator
         buffer.append((cellid, zValue, 1 - norm.cumulativeProbability(Math.abs(zValue))))
       }
       buffer
-    }
+    })
   }
 }
