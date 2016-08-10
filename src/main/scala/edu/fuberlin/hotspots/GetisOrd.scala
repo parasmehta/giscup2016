@@ -27,9 +27,9 @@ object GetisOrd {
       val buffer = new ListBuffer[(Cellid, Double, Double)]
       for((cellid, passengerCount) <- superCell.coreCells){
         val neighbours = superCell.neighbours(cellid)
-        val radicant = ((count * (neighbours.size + 1)) - Math.pow(neighbours.size + 1, 2.0)) / (count - 1)
+        val radicant = ((count * neighbours.size) - Math.pow(neighbours.size, 2.0)) / (count - 1)
         val denominator = stdDev * sqrt(radicant)
-        val numerator = neighbours.sum + passengerCount - (mean * (neighbours.size + 1))
+        val numerator = neighbours.sum - (mean * neighbours.size)
         val zValue = numerator / denominator
         buffer.append((cellid, zValue, 1 - norm.cumulativeProbability(Math.abs(zValue))))
       }

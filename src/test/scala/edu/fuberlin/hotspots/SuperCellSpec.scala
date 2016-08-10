@@ -16,7 +16,7 @@ class SuperCellSpec extends FlatSpec with Matchers {
   val sc = new SuperCell(buffer, 8, compose(-74249, 40501, 1))
 
   it should "find 26 neighbours" in {
-    sc.neighbours((-74245,40505,5)) should have size 26
+    sc.neighbours((-74245,40505,5)) should have size 27
   }
 
   it should "have the correct values" in {

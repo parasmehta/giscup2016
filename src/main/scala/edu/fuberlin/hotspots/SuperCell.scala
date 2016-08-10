@@ -15,14 +15,9 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
     val (x, y, t) = cellid
     val buffer = ListBuffer[Int]()
     for(xO <- -1 to 1; yO <- -1 to 1; tO <- -1 to 1){
-      (xO, yO, tO) match {
-        case (0, 0, 0) => ;
-        case _ => {
-          get(x + xO, y + yO, t + tO) match {
-            case -1 => ;
-            case passengerCount => buffer.append(passengerCount)
-          }
-        }
+      get(x + xO, y + yO, t + tO) match {
+        case -1 => ;
+        case passengerCount => buffer.append(passengerCount)
       }
     }
     buffer.toSeq
