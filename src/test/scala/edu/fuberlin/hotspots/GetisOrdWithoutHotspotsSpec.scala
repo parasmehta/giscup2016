@@ -12,7 +12,7 @@ class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
     val data = new ListBuffer[Trip]()
     for(x <- 1 to 100; y <- 1 to 100; t <- 1 to 100) {
       //create a stdev of 0.5 by using two alternating values
-      data.append(Trip(Point(x, y , t), t % 2))
+      data.append(Trip(x, y , t, t % 2))
     }
     data.toArray
   }

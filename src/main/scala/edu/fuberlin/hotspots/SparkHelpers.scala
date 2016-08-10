@@ -17,7 +17,7 @@ object SparkHelpers {
     def loadTaxi(inputDir:String, sample:Double=1): RDD[Trip] = {
       val taxiData = load(inputDir, sample)
       val trips = taxiData.map(skipErrors(parseTrip)).collect({case Some(t) => t})
-      trips.filter(t => t.dropoff.insideNYC)
+      trips.filter(t => t.insideNYC)
     }
 
     def debugLoadTaxi(inputDir:String, sample:Double=1): RDD[Either[Trip,(String, Exception)]] = {
@@ -41,9 +41,9 @@ object SparkHelpers {
       val gridSize = gs match{ case s:String => s.toDouble case d:Double => d}
       val timeSpan = ts match{case s:String => s.toInt case i:Int => i}
       val cellsWithPassengers = trips.map((t) =>{
-        (((t.dropoff.longitude / gridSize).toInt,
-          (t.dropoff.latitude / gridSize).toInt,
-          t.dropoff.time / timeSpan),
+        (((t.longitude / gridSize).toInt,
+          (t.latitude / gridSize).toInt,
+          t.dayOfYear / timeSpan),
           t.passengerCount)
       })
       cellsWithPassengers.reduceByKey((a,b) => a + b)

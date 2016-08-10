@@ -17,8 +17,8 @@ class ParseSpec extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   it should "have the correct dropoff location" in {
-    trip.dropoff.longitude shouldBe -73.9747 +- 0.0001
-    trip.dropoff.latitude shouldBe 40.7506 +- 0.0001
+    trip.longitude shouldBe -73.9747 +- 0.0001
+    trip.latitude shouldBe 40.7506 +- 0.0001
   }
 
   it should "have the correct passenger count" in {
