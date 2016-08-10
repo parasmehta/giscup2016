@@ -13,13 +13,15 @@ import scala.collection.mutable.ListBuffer
   * Created by Christian Windolf on 01.07.16.
   */
 object GetisOrd {
+  val superCellSize = 25
+
   def calculate(trips:RDD[Trip], cellSize:Any, timeSpan:Any):RDD[(Cellid, Double, Double)] = {
     val observations = trips.toCells(cellSize, timeSpan).cache
     val stdDev = observations.values.stdev
     val mean = observations.values.mean
     val count = observations.count
-    val factory = new SuperCellFactory(25)
-    val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2, 25, c._1))
+    val factory = new SuperCellFactory(superCellSize)
+    val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2, superCellSize, c._1))
     val zValue = zValueFunction(stdDev, mean, count)
     superCells.flatMap(zValue)
   }
