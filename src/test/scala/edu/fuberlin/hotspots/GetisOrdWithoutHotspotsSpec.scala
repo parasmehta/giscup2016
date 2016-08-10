@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   def createTestData():Array[Trip] = {
     val data = new ListBuffer[Trip]()
-    for(x <- 1 to 100; y <- 1 to 100; t <- 1 to 100) {
+    for(x <- -74250 until -74150; y <- 40500 until 40600; t <-0 until 100) {
       //create a stdev of 0.5 by using two alternating values
       data.append(Trip(x, y , t, t % 2))
     }

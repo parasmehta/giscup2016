@@ -19,7 +19,7 @@ object GetisOrd {
     val mean = observations.values.mean
     val count = observations.count
     val factory = new SuperCellFactory(25)
-    val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2.toMap, 25, c._1))
+    val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2, 25, c._1))
     val zValue = zValueFunction(stdDev, mean, count)
     superCells.flatMap(zValue)
   }

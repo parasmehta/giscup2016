@@ -8,11 +8,11 @@ import scala.collection.mutable
   * Created by Christian Windolf on 11.07.16.
   */
 class GetisOrdSpec extends FlatSpec with Matchers {
-  val map = new mutable.HashMap[Cellid, Int]
-  for(x <- 0 to 5; y <- 0 to 5; t <- 0 to 5){
-    map.put((x, y, t), 1)
+  val buffer = new mutable.ListBuffer[(Cellid, Int)]
+  for(x <- -74250 to -74240 ; y <- 40500 to 40505; t <- 0 to 5){
+    buffer.append(((x, y, t), 1))
   }
-  val sc = new SuperCell(map.toMap, 4, (1, 1, 1))
+  val sc = new SuperCell(buffer, 4, (-74249, 40501, 1))
 
   val zValues = GetisOrd.zValueFunction(.5d, .5d, 216)
 

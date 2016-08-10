@@ -1,20 +1,27 @@
 package edu.fuberlin.hotspots
 
+import it.unimi.dsi.fastutil.ints.{Int2IntAVLTreeMap, Int2IntMap}
+
 import scala.collection.mutable.ListBuffer
 
 /**
   * Created by Christian Windolf on 08.07.16.
   */
-class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid) extends Serializable{
+class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Serializable{
+  def this(cellSeq:Seq[(Cellid, Int)], size: Int, base:Cellid){
+    this(new Int2IntAVLTreeMap(cellSeq.map(c => SuperCell.flatKey(c._1)).toArray, cellSeq.map(_._2).toArray), size, base)
+  }
   def neighbours(cellid:Cellid): Seq[Int] = {
     val (x, y, t) = cellid
     val buffer = ListBuffer[Int]()
     for(xO <- -1 to 1; yO <- -1 to 1; tO <- -1 to 1){
       (xO, yO, tO) match {
         case (0, 0, 0) => ;
-        case _ => cells.get((x + xO, y + yO, t + tO)) match{
-          case Some(value) => buffer.append(value)
-          case _ => ;
+        case _ => {
+          get(x + xO, y + yO, t + tO) match {
+            case -1 => ;
+            case passengerCount => buffer.append(passengerCount)
+          }
         }
       }
     }
@@ -24,9 +31,21 @@ class SuperCell(val cells:Map[Cellid, Int], val size:Int, val base:Cellid) exten
   def coreCells:Seq[(Cellid, Int)] = {
     val buffer = ListBuffer[(Cellid, Int)]()
     for(x <- base._1 until base._1 + size; y <- base._2 until base._2 + size; t <- base._3 until base._3 + size){
-      cells.get(x, y, t) match{ case Some(value) => buffer.append(((x, y, t), value)) case None => }
+      get(x, y, t) match{ case -1 => ; case passengerCount => buffer.append(((x, y, t), passengerCount))}
     }
     buffer
+  }
+
+  def get(x:Int, y:Int, t:Int):Int = {
+    val key = (x + 74200) * 100000 + (y - 40500) * 1000 + t
+    cells.containsKey(key) match { case true => cells.get(key) case false => -1 }
+  }
+}
+
+object SuperCell{
+  def flatKey(c:Cellid):Int = {
+    val (x,y,t) = c
+    (x + 74200) * 100000 + (y - 40500) * 1000 + t
   }
 }
 
