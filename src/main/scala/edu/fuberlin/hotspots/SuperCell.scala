@@ -38,7 +38,7 @@ class SuperCellFactory(val size:Int) extends Serializable {
   }
 
   private def superID(cellID:Cellid):Cellid = {
-    (cellID._1 - ((size + cellID._1 % size) % 10), (cellID._2 - (cellID._2 % size)), cellID._3 - (cellID._3 % size))
+    (cellID._1 - ((size + cellID._1 % size) % size), (cellID._2 - (cellID._2 % size)), cellID._3 - (cellID._3 % size))
   }
 
   private def offsets(coordinate:Long):Seq[Int] = {
