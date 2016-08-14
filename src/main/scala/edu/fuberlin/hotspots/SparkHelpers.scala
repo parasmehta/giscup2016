@@ -27,7 +27,7 @@ object SparkHelpers {
       rdd.map(_.isLeft).countByValue.get(false).get.toDouble / rdd.count.toDouble
     }
 
-    def errors = rdd.collect({case t if t.isRight => t.right.get})
+    def errors = rdd.collect({case Right(t) => t})
 
     def errorStat = rdd.errors.map(_._2.getClass.getSimpleName).countByValue
   }
