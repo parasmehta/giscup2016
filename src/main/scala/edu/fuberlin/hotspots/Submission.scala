@@ -37,7 +37,7 @@ object Submission {
       Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$2"), Class.forName("scala.math.Ordering$Double$")
     ))
     val sc = new SparkContext(conf)
-    submit(sc, inputDirectory, outputFile, gridSize, timeSpan, sample)
+    submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
   }
 
   def printHelp = {
@@ -46,17 +46,15 @@ object Submission {
     println("  path/to/jar \\")
     println("  {hdfs,file,}://path/to/input_directory \\")
     println("  {hdfs,file,}://path/to/output_file \\")
-    println("  {spatial gridsize in degrees (0.001 for example)} \\")
-    println("  {temporal gridsize in days} (1 for example)")
+    println("  {spatial gridsize in degrees (0.001 for example)}")
   }
 
   def submit(sc:SparkContext,
              inputDir:String,
              outputFile:String,
              gridSize:Any,
-             timeSpan:Any,
-             sample:Double):Unit = {
-    val taxiData = sc.loadTaxi(inputDir, sample)
+             timeSpan:Any):Unit = {
+    val taxiData = sc.loadTaxi(inputDir)
     val zvalues = GetisOrd.calculate(taxiData, gridSize, timeSpan)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {

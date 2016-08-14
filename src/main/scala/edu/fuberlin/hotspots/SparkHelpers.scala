@@ -10,18 +10,14 @@ import org.apache.spark.rdd.RDD
   */
 object SparkHelpers {
   implicit class RichContext(sc:SparkContext) {
-    private def load(inputDir:String, sample:Double): RDD[String] = {
-      if(sample == 1) sc.textFile(inputDir) else sc.textFile(inputDir).sample(false, sample)
-    }
-
-    def loadTaxi(inputDir:String, sample:Double=1): RDD[Trip] = {
-      val taxiData = load(inputDir, sample)
+    def loadTaxi(inputDir:String): RDD[Trip] = {
+      val taxiData = sc.textFile(inputDir)
       val trips = taxiData.map(skipErrors(parseTrip)).collect({case Some(t) => t})
       trips.filter(t => t.insideNYC)
     }
 
-    def debugLoadTaxi(inputDir:String, sample:Double=1): RDD[Either[Trip,(String, Exception)]] = {
-      val taxiData = load(inputDir, sample)
+    def debugLoadTaxi(inputDir:String): RDD[Either[Trip,(String, Exception)]] = {
+      val taxiData = sc.textFile(inputDir)
       taxiData.map(saveErrors(parseTrip))
     }
   }
