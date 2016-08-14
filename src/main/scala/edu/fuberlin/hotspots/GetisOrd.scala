@@ -22,7 +22,7 @@ object GetisOrd {
     val count = observations.count
     val norm = new NormalDistribution()
     val factory = new SuperCellFactory(superCellSize)
-    val superCells = observations.flatMap(factory.create).mapValues(Seq(_)).reduceByKey(_ ++ _).map(c => new SuperCell(c._2, superCellSize, c._1))
+    val superCells = observations.flatMap(factory.create).aggregateByKey(Seq[(Int, Int)]())(_ :+ _, _ ++ _).map(c => new SuperCell(c._2, superCellSize, c._1))
     superCells.flatMap(superCell => {
       val buffer = new ListBuffer[(Cellid, Double, Double)]
       for((cellid, passengerCount) <- superCell.coreCells){
