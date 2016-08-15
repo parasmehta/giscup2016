@@ -1,12 +1,9 @@
 package edu.fuberlin.hotspots
 
-import java.io.{BufferedOutputStream, File, FileOutputStream}
-import java.math.BigDecimal
+import java.io.{File, FileOutputStream}
 
 import org.apache.spark.{SparkConf, SparkContext}
-import SparkHelpers._
 import org.apache.hadoop.fs.{FileSystem, Path}
-import org.apache.spark.rdd.RDD
 
 import scala.util.matching.Regex
 
@@ -23,16 +20,16 @@ object Submission {
 
     val inputDirectory = args(0)
     val outputFile = args(1)
-
     val gridSize = args(2)
     val timeSpan = args(3)
 
-    val sample = args.lift(4).getOrElse("1").toDouble
     val conf = new SparkConf().setAppName("Fu-Berlin")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     conf.set("spark.kryo.registrationRequired", "true")
-    conf.registerKryoClasses(Array(classOf[Trip], classOf[SuperCell], classOf[SuperCellFactory],
-      classOf[Option[Trip]], classOf[(Cellid, Int)], classOf[(Cellid, Double)],
+    conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
+    conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
+    conf.registerKryoClasses(Array(classOf[SuperCell], classOf[SuperCellFactory],
+      classOf[(Int, Int)], classOf[(Cellid, Double, Double)],
       classOf[Array[Double]], classOf[org.apache.spark.util.StatCounter],
       classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]],
       classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]],
@@ -90,7 +87,7 @@ object Submission {
           None
         }
       } catch{case e:Throwable => None}
-    }.collect({case Some(t) => t}).reduceByKey(_ + _).cache
+    }.collect({case Some(t) => t}).reduceByKey(_ + _)
     val zvalues = GetisOrd.calculate(cells)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
