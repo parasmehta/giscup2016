@@ -8,6 +8,9 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import scala.util.matching.Regex
 
 /**
+  * An implementation of the GetisOrd G* statistics that is tightliy tied to NYC taxi data from 2015.
+  * (really, other years than 2015 are not supported)
+  * It supports also only a very simple weight matrix, where all neighbouring cells are 1 and the others 0.
   * Created by Christian Windolf on 29.06.16.
   */
 object Submission {
@@ -28,8 +31,7 @@ object Submission {
     conf.set("spark.kryo.registrationRequired", "true")
     conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
-    conf.registerKryoClasses(Array(
-      classOf[org.apache.spark.util.StatCounter],//required
+    conf.registerKryoClasses(Array(classOf[org.apache.spark.util.StatCounter],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
       Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
     ))
@@ -46,34 +48,32 @@ object Submission {
     println("  {spatial gridsize in degrees (0.001 for example)}")
   }
 
-
   val dateRegex = new Regex("""^2015-(\d{2})-(\d{2}).*""")
-  def submit(sc:SparkContext,
-             inputDir:String,
-             outputFile:String,
-             gridSize:Any,
-             timeSpan:Any):Unit = {
+  /**
+    * compute the getis ord G* statistics with the given spark context
+    * It outputs the 50 hottest zones.
+    *
+    * Designed to be used in the spark-shell as well by the main function, that is called by spark-submit
+    * @param sc SparkContext, must not be stopped when calling this function
+    * @param inputDir The directory or file to read the csv from.
+    * @param outputFile File tpo store the result
+    * @param gridSize Size of a grid in degrees. Minimum supported value: 0.001, can be either a String or a Double.
+    * @param timeSpan number of days that span over a cell, can be either an Integer or a String.
+    */
+  def submit(sc:SparkContext, inputDir:String, outputFile:String, gridSize:Any, timeSpan:Any):Unit = {
     val gs = gridSize match {case s:String => s.toDouble case d:Double => d}
     val ts = timeSpan match {case s:String => s.toInt case i:Int => i}
     val taxiData = sc.textFile(inputDir)
     val cells = taxiData.map{line =>
       try {
         val fields = line.split(",")
+        //turned out we loose with the standard date parsing libraries about 10 secs, so we implemented
+        //it ourself
         val dateRegex(m, d) = fields(2)
         val (month, day) = (m.toInt, d.toInt)
         val t = day + (month match {
-          case 1 => 0
-          case 2 => 31
-          case 3 => 59
-          case 4 => 90
-          case 5 => 120
-          case 6 => 151
-          case 7 => 181
-          case 8 => 212
-          case 9 => 243
-          case 10 => 273
-          case 11 => 304
-          case 12 => 334
+          case 1 => 0 case 2 => 31 case 3 => 59 case 4 => 90 case 5 => 120 case 6 => 151 case 7 => 181 case 8 => 212
+          case 9 => 243 case 10 => 273 case 11 => 304 case 12 => 334
         })
         val passengerCount = fields(3).toInt
         val longitude = fields(9).toDouble
