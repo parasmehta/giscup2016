@@ -29,12 +29,11 @@ object Submission {
     conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.registerKryoClasses(Array(classOf[SuperCell], classOf[SuperCellFactory],
-      classOf[(Int, Int)], classOf[(Cellid, Double, Double)],
-      classOf[Array[Double]], classOf[org.apache.spark.util.StatCounter],
+      classOf[org.apache.spark.util.StatCounter],
       classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]],
       classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
-      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$5"), Class.forName("scala.math.Ordering$Double$")
+      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
     ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
