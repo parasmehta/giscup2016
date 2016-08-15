@@ -6,6 +6,9 @@ import java.math.BigDecimal
 import org.apache.spark.{SparkConf, SparkContext}
 import SparkHelpers._
 import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.spark.rdd.RDD
+
+import scala.util.matching.Regex
 
 /**
   * Created by Christian Windolf on 29.06.16.
@@ -34,7 +37,7 @@ object Submission {
       classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]],
       classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
-      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$2"), Class.forName("scala.math.Ordering$Double$")
+      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$5"), Class.forName("scala.math.Ordering$Double$")
     ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
@@ -49,13 +52,46 @@ object Submission {
     println("  {spatial gridsize in degrees (0.001 for example)}")
   }
 
+
+  val dateRegex = new Regex("""^2015-(\d{2})-(\d{2}).*""")
   def submit(sc:SparkContext,
              inputDir:String,
              outputFile:String,
              gridSize:Any,
              timeSpan:Any):Unit = {
-    val taxiData = sc.loadTaxi(inputDir)
-    val zvalues = GetisOrd.calculate(taxiData, gridSize, timeSpan)
+    val gs = gridSize match {case s:String => s.toDouble case d:Double => d}
+    val ts = timeSpan match {case s:String => s.toInt case i:Int => i}
+    val taxiData = sc.textFile(inputDir)
+    val cells = taxiData.map{line =>
+      try {
+        val fields = line.split(",")
+        val dateRegex(m, d) = fields(2)
+        val (month, day) = (m.toInt, d.toInt)
+        val t = day + (month match {
+          case 1 => 0
+          case 2 => 31
+          case 3 => 59
+          case 4 => 90
+          case 5 => 120
+          case 6 => 151
+          case 7 => 181
+          case 8 => 212
+          case 9 => 243
+          case 10 => 273
+          case 11 => 304
+          case 12 => 334
+        })
+        val passengerCount = fields(3).toInt
+        val longitude = fields(9).toDouble
+        val latitude = fields(10).toDouble
+        if(latitude >= 40.5 && latitude <= 40.9 && longitude >= -74.25 && longitude <= -73.4){
+          Some((compose((longitude / gs).toInt, (latitude / gs).toInt, t / ts), passengerCount))
+        } else {
+          None
+        }
+      } catch{case e:Throwable => None}
+    }.collect({case Some(t) => t}).reduceByKey(_ + _).cache
+    val zvalues = GetisOrd.calculate(cells)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
       case "hdfs" => {
