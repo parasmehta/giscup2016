@@ -28,10 +28,8 @@ object Submission {
     conf.set("spark.kryo.registrationRequired", "true")
     conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
-    conf.registerKryoClasses(Array(classOf[SuperCell], classOf[SuperCellFactory],
-      classOf[org.apache.spark.util.StatCounter],
-      classOf[scala.reflect.ClassTag$$anon$1], classOf[java.lang.Class[_]],
-      classOf[scala.collection.mutable.WrappedArray$ofRef], classOf[Array[String]],
+    conf.registerKryoClasses(Array(
+      classOf[org.apache.spark.util.StatCounter],//required
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
       Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
     ))
