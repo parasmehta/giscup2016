@@ -5,12 +5,23 @@ import it.unimi.dsi.fastutil.ints.{Int2IntAVLTreeMap, Int2IntMap}
 import scala.collection.mutable.ListBuffer
 
 /**
+  * A supercell is a cube containing cells (A cell consists of its ID and the number of passenger dropped off there).
+  * The design goal of this class is to allow every cell inside the super cell to access all of its neighbours.
+  * Therefore, a supercell also contains buffer cells. These do not actually belong to the supercell and just serve
+  * as neighbours to the real core cells
   * Created by Christian Windolf on 08.07.16.
   */
 class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val composer:Composer) extends Serializable{
   def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int, composer:Composer){
     this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, composer.decompose(base), composer)
   }
+
+  /**
+    * get the a list of the number of passengers dropped off in the neighbours.
+    * It does not return the cellids of the neighbours
+    * @param cellid
+    * @return
+    */
   def neighbours(cellid:Cellid): Seq[Int] = {
     val (x, y, t) = cellid
     val buffer = ListBuffer[Int]()
@@ -23,6 +34,10 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val compose
     buffer.toSeq
   }
 
+  /**
+    * List of cells without the buffer cells
+    * @return
+    */
   def coreCells:Seq[(Cellid, Int)] = {
     val buffer = ListBuffer[(Cellid, Int)]()
     for(x <- base._1 until base._1 + size; y <- base._2 until base._2 + size; t <- base._3 until base._3 + size){
@@ -31,12 +46,29 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val compose
     buffer
   }
 
+  /**
+    * get a cell for the given cellid. Composed cellids are used in the internal.
+    * This reduces the memory by havin smaller keys and allows us to take advantage of the
+    * fastutils library.
+    * @param x
+    * @param y
+    * @param t
+    * @return
+    */
   def get(x:Int, y:Int, t:Int):Int = {
     val key = composer.compose(x, y, t)
     cells.containsKey(key) match { case true => cells.get(key) case false => -1 }
   }
 }
 
+/**
+  * The task of this class is to determine to which supercell a cell belongs.
+  * A cell can be at the edge or even at the corner of a supercell.
+  * If that turns out to be true, the this cell belongs to multiple supercells. As a core cell to only one supercell
+  * and a buffer cell in 1 up to 8 different supercells.
+  * @param size
+  * @param composer
+  */
 class SuperCellFactory(val size:Int, val composer:Composer) extends Serializable {
   private def base(cellID:Cellid):Cellid = {
     val (x, y, t) = cellID
