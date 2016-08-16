@@ -1,6 +1,6 @@
 package edu.fuberlin.hotspots
 
-import java.lang.Math.sqrt
+import java.lang.Math.{sqrt, abs}
 
 import org.apache.commons.math3.distribution.NormalDistribution
 import org.apache.spark.rdd.RDD
@@ -11,6 +11,12 @@ import scala.collection.mutable.ListBuffer
   * Created by Christian Windolf on 01.07.16.
   */
 object GetisOrd {
+  /**
+    * The size of a supercell in one dimension.
+    * As we have three dimensions, the size of a supercell is 25 * 25 * 25 = 15625.
+    * This the possible number of core cells. Then there are also the buffer cells.
+    * So in the end, we might end up with 27 * 27 * 27 = 19683 cells in one supercell.
+    */
   val superCellSize = 25
 
   def calculate(cells:RDD[(Int, Int)], composer:Composer):RDD[(Cellid, Double, Double)] = {
@@ -31,7 +37,12 @@ object GetisOrd {
         val denominator = stdDev * sqrt(radicant)
         val numerator = neighbours.sum - (mean * neighbours.size)
         val zValue = numerator / denominator
-        buffer.append((cellid, zValue, 1 - norm.cumulativeProbability(Math.abs(zValue))))
+        /*
+        It was not absolutely clear, how the p-value should be calculated (assuming which distribution and so on)
+        We chose to stick with the PySal implementation of p-values of z-scores.
+        That is 1 - norm.cdf(zScore)
+         */
+        buffer.append((cellid, zValue, 1 - norm.cumulativeProbability(abs(zValue))))
       }
       buffer
     })
