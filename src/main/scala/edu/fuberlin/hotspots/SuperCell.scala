@@ -7,9 +7,9 @@ import scala.collection.mutable.ListBuffer
 /**
   * Created by Christian Windolf on 08.07.16.
   */
-class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Serializable{
-  def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int){
-    this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, decompose(base))
+class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val composer:Composer) extends Serializable{
+  def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int, composer:Composer){
+    this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, composer.decompose(base), composer)
   }
   def neighbours(cellid:Cellid): Seq[Int] = {
     val (x, y, t) = cellid
@@ -32,12 +32,12 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
   }
 
   def get(x:Int, y:Int, t:Int):Int = {
-    val key = compose(x, y, t)
+    val key = composer.compose(x, y, t)
     cells.containsKey(key) match { case true => cells.get(key) case false => -1 }
   }
 }
 
-class SuperCellFactory(val size:Int) extends Serializable {
+class SuperCellFactory(val size:Int, val composer:Composer) extends Serializable {
   private def base(cellID:Cellid):Cellid = {
     val (x, y, t) = cellID
     val xcor = x match {case x if x % size == 0 => x case x => ((x / size) - 1) * size}
@@ -57,12 +57,12 @@ class SuperCellFactory(val size:Int) extends Serializable {
   }
 
   def create(cell:(Int, Int)): Seq[(Int, (Int, Int))] = {
-    val (x, y, t) = decompose(cell._1)
+    val (x, y, t) = composer.decompose(cell._1)
     val (offX, offY, offT) = (offsets((x % size) + size), offsets(y), offsets(t))
     val buffer = new ListBuffer[(Int, (Int, Int))]()
     for(oX <- offX; oY <- offY; oT <- offT){
       val pseudoCellID = (x + (oX * size), y + (oY * size), t + (oT * size))
-      buffer.append((compose(superID(pseudoCellID)), cell))
+      buffer.append((composer.compose(superID(pseudoCellID)), cell))
     }
     buffer.toSeq
   }

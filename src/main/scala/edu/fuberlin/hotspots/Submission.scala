@@ -33,7 +33,8 @@ object Submission {
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.registerKryoClasses(Array(classOf[org.apache.spark.util.StatCounter],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
-      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
+      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$"),
+      classOf[Composer]
     ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
@@ -56,7 +57,7 @@ object Submission {
     * Designed to be used in the spark-shell as well by the main function, that is called by spark-submit
     * @param sc SparkContext, must not be stopped when calling this function
     * @param inputDir The directory or file to read the csv from.
-    * @param outputFile File tpo store the result
+    * @param outputFile File to store the result
     * @param gridSize Size of a grid in degrees. Minimum supported value: 0.001, can be either a String or a Double.
     * @param timeSpan number of days that span over a cell, can be either an Integer or a String.
     */
@@ -64,6 +65,7 @@ object Submission {
     val gs = gridSize match {case s:String => s.toDouble case d:Double => d}
     val ts = timeSpan match {case s:String => s.toInt case i:Int => i}
     val taxiData = sc.textFile(inputDir)
+    val composer = new Composer(gs)
     val cells = taxiData.map{line =>
       try {
         val fields = line.split(",")
@@ -78,14 +80,15 @@ object Submission {
         val passengerCount = fields(3).toInt
         val longitude = fields(9).toDouble
         val latitude = fields(10).toDouble
-        if(latitude >= 40.5 && latitude <= 40.9 && longitude >= -74.25 && longitude <= -73.4){
-          Some((compose((longitude / gs).toInt, (latitude / gs).toInt, t / ts), passengerCount))
+        if(latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE &&
+          longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE){
+          Some((composer.compose((longitude / gs).toInt, (latitude / gs).toInt, t / ts), passengerCount))
         } else {
           None
         }
       } catch{case e:Throwable => None}
     }.collect({case Some(t) => t}).reduceByKey(_ + _)
-    val zvalues = GetisOrd.calculate(cells)
+    val zvalues = GetisOrd.calculate(cells, composer)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
       case "hdfs" => {
