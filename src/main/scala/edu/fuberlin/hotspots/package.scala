@@ -4,6 +4,11 @@ package edu.fuberlin
   * Created by Christian Windolf on 24.06.16.
   */
 package object hotspots {
+  /**
+    * first value: x/longitude
+    * second value: y/latitude
+    * third value: t/time
+    */
   type Cellid = (Int, Int, Int)
 
   val MIN_LONGITUDE = -74.3
@@ -16,7 +21,7 @@ package object hotspots {
     * Turn the 3-tuple for cell id into a single Int.
     * The grid size must be above 0.001 degrees for the function to remain its bijective property.
     * By that the amount of data send over network is reduced drastically.
-    * @param cellid Each component of the id must not have a range larger than 1000
+    * @param cellid x value must be below 2 ** 13, y value below 2 ** 10 and t value below 2 ** 9
     * @return
     */
   def compose(cellid:Cellid):Int =  (cellid._1 << 19) | (cellid._2 << 9) | cellid._3
