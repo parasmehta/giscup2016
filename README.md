@@ -7,19 +7,22 @@ This project is an implementation for the [SIGSPATIAL 2016 Cup](http://sigspatia
 ## Build
 The build process requires the *Scala Build Tool*, aka `sbt`.
 
-```bash
-# Takes up to ten minutes
-sbt assembly
-```
-
-This can take more than ten minutes due to very slow tests.
-
-**To build the project faster, leave out the tests:**
+### Build without tests (fast)
+To build the project faster, leave out the tests:
 
 ```bash
 # Takes about 1 minute
 sbt 'set test in assembly := {}' assembly
 ```
+
+### Build with tests (slow)
+This can take more than ten minutes due to the tests.
+
+```bash
+# Takes up to ten minutes
+sbt assembly
+```
+
 After compiling, the jar can be found at `target/scala_2.10/hotspots-assembly-1.0.jar`.
 
 
