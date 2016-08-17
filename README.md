@@ -14,7 +14,7 @@ sbt assembly
 
 This can take more than ten minutes due to very slow tests.
 
-To build the project faster, leave out the tests:
+**To build the project faster, leave out the tests:**
 
 ```bash
 # Takes about 1 minute
@@ -35,7 +35,7 @@ The minimum supported value for grid size is `0.0005` degrees to reduce memory o
 
 
 ## How it works
-Our solution tries to maximize parallelism by putting cells and their immediate neighbours into the same partition so that they end up on the same node. 
+Our solution tries to maximize parallelism by putting cells and their immediate neighbours into the same partition so that they end up on the same node.
 Our tests on a small test cluster show that the majority of time is spent on rearranging the data to align data locality with spatiotemporal locality and thus, very little time is spent on computing the statistic once the data has been arranged.
 
 ### First Phase (from lines to cells)
@@ -47,14 +47,14 @@ For each line, a tuple (X,Y,T) consisting of the coordinates/id of the cell is c
 ...,2015-07-08 19:20:21,2,...,-73.983688354492187,40.766708374023438,... => ((-73983,40766,189), 2)
 ```
 
-The cell id is further "compressed" into a single integer, to reduce the network traffic. 
+The cell id is further "compressed" into a single integer, to reduce the network traffic.
 This is the reason why the grid size cannot be below 0.0005. Otherwise we might end up with more than 2 billion cells.
 
 The set of initial cells gets reduced to the final cells by adding up the `passengerCount` if they have the same cell id.
 
 ### Second phase (from cells to supercells)
 Now we want to make sure that the cells and their neighbours end up on the same node.
-For this, a cube of cells is grouped into one *supercell*. However, a cell inside this cube might have neighbours residing in other supercells if it lies on the boundary of the cube. To avoid this, the boundary cells are stored in multiple supercells (up to 8). This is equivalent to creating a buffer around each supercell. 
+For this, a cube of cells is grouped into one *supercell*. However, a cell inside this cube might have neighbours residing in other supercells if it lies on the boundary of the cube. To avoid this, the boundary cells are stored in multiple supercells (up to 8). This is equivalent to creating a buffer around each supercell.
 Each cell is a member of one and only one *core* of a supercell, but a cell can be member of the *buffer or boundary area* of up to 8 supercells (in a 3-dimensional space).
 
 ```
