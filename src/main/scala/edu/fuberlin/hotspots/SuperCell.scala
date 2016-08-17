@@ -11,9 +11,9 @@ import scala.collection.mutable.ListBuffer
   * as neighbours to the real core cells
   * Created by Christian Windolf on 08.07.16.
   */
-class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val composer:Composer) extends Serializable{
-  def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int, composer:Composer){
-    this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, composer.decompose(base), composer)
+class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Serializable{
+  def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int){
+    this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, decompose(base))
   }
 
   /**
@@ -56,7 +56,7 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val compose
     * @return
     */
   def get(x:Int, y:Int, t:Int):Int = {
-    val key = composer.compose(x, y, t)
+    val key = compose(x, y, t)
     cells.containsKey(key) match { case true => cells.get(key) case false => -1 }
   }
 }
@@ -67,17 +67,15 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid, val compose
   * If that turns out to be true, the this cell belongs to multiple supercells. As a core cell to only one supercell
   * and a buffer cell in 1 up to 8 different supercells.
   * @param size
-  * @param composer
   */
-class SuperCellFactory(val size:Int, val composer:Composer) extends Serializable {
+class SuperCellFactory(val size:Int) extends Serializable {
   private def base(cellID:Cellid):Cellid = {
     val (x, y, t) = cellID
-    val xcor = x match {case x if x % size == 0 => x case x => ((x / size) - 1) * size}
-    (xcor, (y / size) * size, (t / size) * size)
+    ((x / size) * size, (y / size) * size, (t / size) * size)
   }
 
   private def superID(cellID:Cellid):Cellid = {
-    (cellID._1 - ((size + cellID._1 % size) % size), (cellID._2 - (cellID._2 % size)), cellID._3 - (cellID._3 % size))
+    (cellID._1 - (cellID._1 % size), cellID._2 - (cellID._2 % size), cellID._3 - (cellID._3 % size))
   }
 
   private def offsets(coordinate:Long):Seq[Int] = {
@@ -89,12 +87,12 @@ class SuperCellFactory(val size:Int, val composer:Composer) extends Serializable
   }
 
   def create(cell:(Int, Int)): Seq[(Int, (Int, Int))] = {
-    val (x, y, t) = composer.decompose(cell._1)
-    val (offX, offY, offT) = (offsets((x % size) + size), offsets(y), offsets(t))
+    val (x, y, t) = decompose(cell._1)
+    val (offX, offY, offT) = (offsets(x), offsets(y), offsets(t))
     val buffer = new ListBuffer[(Int, (Int, Int))]()
     for(oX <- offX; oY <- offY; oT <- offT){
       val pseudoCellID = (x + (oX * size), y + (oY * size), t + (oT * size))
-      buffer.append((composer.compose(superID(pseudoCellID)), cell))
+      buffer.append((compose(superID(pseudoCellID)), cell))
     }
     buffer.toSeq
   }

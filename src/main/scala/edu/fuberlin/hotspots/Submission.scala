@@ -33,8 +33,7 @@ object Submission {
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.registerKryoClasses(Array(classOf[org.apache.spark.util.StatCounter],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
-      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$"),
-      classOf[Composer]
+      Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
     ))
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
@@ -65,7 +64,8 @@ object Submission {
     val gs = gridSize match {case s:String => s.toDouble case d:Double => d}
     val ts = timeSpan match {case s:String => s.toInt case i:Int => i}
     val taxiData = sc.textFile(inputDir)
-    val composer = new Composer(gs)
+    val xOrigin = (MIN_LONGITUDE / gs).toInt
+    val yOrigin = (MIN_LATITUDE / gs).toInt
     val cells = taxiData.map{line =>
       try {
         val fields = line.split(",")
@@ -82,14 +82,15 @@ object Submission {
         val latitude = fields(10).toDouble
         if(latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE &&
           longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE){
-          Some((composer.compose((longitude / gs).toInt, (latitude / gs).toInt, t / ts), passengerCount))
+          Some((compose((longitude / gs).toInt - xOrigin, (latitude / gs).toInt - yOrigin, t / ts), passengerCount))
         } else {
           None
         }
       } catch{case e:Throwable => None}
     }.collect({case Some(t) => t}).reduceByKey(_ + _)
-    val zvalues = GetisOrd.calculate(cells, composer)
-    val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> s"${c._1._1}, ${c._1._2}, ${c._1._3}, ${c._2}, ${c._3}")
+    val zvalues = GetisOrd.calculate(cells)
+    val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> (decompose(c._1), c._2, c._3))
+      .map(c=> s"${c._1._1 + xOrigin}, ${c._1._2 + yOrigin}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
       case "hdfs" => {
         val fs = FileSystem.get(sc.hadoopConfiguration)
