@@ -16,15 +16,15 @@ package object hotspots {
     * Turn the 3-tuple for cell id into a single Int.
     * The grid size must be above 0.001 degrees for the function to remain its bijective property.
     * By that the amount of data send over network is reduced drastically.
-    * @param c Each component of the id must not have a range larger than 1000
+    * @param cellid Each component of the id must not have a range larger than 1000
     * @return
     */
-  def compose(cellid:Cellid):Int =  cellid._1 * 1000000 + cellid._2 * 1000 + cellid._3
+  def compose(cellid:Cellid):Int =  (cellid._1 << 19) | (cellid._2 << 9) | cellid._3
 
   /**
-    * Oppsite of [[Composer.compose()]]
-    * @param k
+    * Oppsite of [[compose()]]
+    * @param cellid
     * @return
     */
-  def decompose(cellid:Int):Cellid = (cellid / 1000000, (cellid % 1000000) / 1000, cellid % 1000)
+  def decompose(cellid:Int):Cellid = (cellid >> 19, (cellid >> 9) & 0x1FF, cellid & 0x1FF)
 }
