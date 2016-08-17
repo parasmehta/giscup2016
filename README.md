@@ -61,21 +61,21 @@ For this, a cube of cells is grouped into one *supercell*. However, a cell insid
 Each cell is a member of one and only one *core* of a supercell, but a cell can be member of the *buffer or boundary area* of up to 8 supercells (in a 3-dimensional space).
 
 ```
-+-------------------------------+
-!  boundary                     !
-! ____________________________  !
-!b|                           |b!
-!o|                           |o!
-!u|       CORE                |u!
-!n|        OF                 |n!
-!d|     SUPERCELL             |d!
-!a|                           |a!
-!r|                           |r!
-!y|                           |y!
-! |                           | !
-! L___________________________| !
-!  boundary                     !
-+-------------------------------+
++---------------------------------+
+!          boundary               !
+!  ____________________________   !
+!b |                           |b !
+!o |                           |o !
+!u |       CORE                |u !
+!n |        OF                 |n !
+!d |     SUPERCELL             |d !
+!a |                           |a !
+!r |                           |r !
+!y |                           |y !
+!  |                           |  !
+!  L___________________________|  !
+!           boundary              !
++---------------------------------+
 ```
 
 ### Phase Three (From Supercells to ZScores)
