@@ -63,7 +63,7 @@ object Submission {
   def submit(sc:SparkContext, inputDir:String, outputFile:String, gridSize:Any, timeSpan:Any):Unit = {
     val gs = gridSize match {case s:String => s.toDouble case d:Double => d}
     val ts = timeSpan match {case s:String => s.toInt case i:Int => i}
-    val taxiData = sc.textFile(inputDir)
+    val taxiData = sc.textFile(inputDir, 200)
     val xOrigin = (MIN_LONGITUDE / gs).toInt
     val yOrigin = (MIN_LATITUDE / gs).toInt
     //Phase 1: from to lines to cells
