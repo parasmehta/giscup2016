@@ -8,8 +8,8 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import scala.util.matching.Regex
 
 /**
-  * An implementation of the GetisOrd G* statistics that is tightliy tied to NYC taxi data from 2015.
-  * (really, other years than 2015 are not supported)
+  * An implementation of the GetisOrd G* statistics that is tailored to NYC taxi data from 2015.
+  * (really, other years than 2015 are not supported :) )
   * It supports also only a very simple weight matrix, where all neighbouring cells are 1 and the others 0.
   * Created by Christian Windolf on 29.06.16.
   */

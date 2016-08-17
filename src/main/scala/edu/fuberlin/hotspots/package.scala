@@ -5,9 +5,9 @@ package edu.fuberlin
   */
 package object hotspots {
   /**
-    * first value: x/longitude
-    * second value: y/latitude
-    * third value: t/time
+    * first value: x/longitude identifier
+    * second value: y/latitude identifier
+    * third value: t/time identifer
     */
   type Cellid = (Int, Int, Int)
 
@@ -19,7 +19,7 @@ package object hotspots {
 
   /**
     * Turn the 3-tuple for cell id into a single Int.
-    * The grid size must be above 0.001 degrees for the function to remain its bijective property.
+    * The grid size must be above 0.0005 degrees for the function to remain bijective.
     * By that the amount of data send over network is reduced drastically.
     * @param cellid x value must be below 2 ** 13, y value below 2 ** 10 and t value below 2 ** 9
     * @return
