@@ -8,17 +8,21 @@ import scala.collection.mutable.ListBuffer
   * A supercell is a cube containing cells (A cell consists of its ID and the number of passenger dropped off there).
   * The design goal of this class is to allow every cell inside the super cell to access all of its neighbours.
   * Therefore, a supercell also contains buffer cells. These do not actually belong to the supercell and just serve
-  * as neighbours to the real core cells
+  * as neighbours to the real core cells.
+  * @param cells From composed cellid to its passengercount
+  * @param size: Size of the supercell. It must be positive.
+  * @param origin The most left front down corner of the super cell
   * Created by Christian Windolf on 08.07.16.
   */
-class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Serializable{
+class SuperCell(val cells:Int2IntMap, val size:Int, val origin:Cellid) extends Serializable{
   def this(cellSeq:Seq[(Int, Int)], size: Int, base:Int){
     this(new Int2IntAVLTreeMap(cellSeq.map(_._1).toArray, cellSeq.map(_._2).toArray), size, decompose(base))
   }
 
   /**
     * get the a list of the number of passengers dropped off in the neighbours.
-    * It does not return the cellids of the neighbours
+    * It does not return the cellids of the neighbours.
+    * Result includes the cell that was passed in the parameter.
     * @param cellid
     * @return
     */
@@ -40,7 +44,7 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
     */
   def coreCells:Seq[(Cellid, Int)] = {
     val buffer = ListBuffer[(Cellid, Int)]()
-    for(x <- base._1 until base._1 + size; y <- base._2 until base._2 + size; t <- base._3 until base._3 + size){
+    for(x <- origin._1 until origin._1 + size; y <- origin._2 until origin._2 + size; t <- origin._3 until origin._3 + size){
       get(x, y, t) match{ case -1 => ; case passengerCount => buffer.append(((x, y, t), passengerCount))}
     }
     buffer
@@ -48,7 +52,7 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
 
   /**
     * get a cell for the given cellid. Composed cellids are used in the internal.
-    * This reduces the memory by havin smaller keys and allows us to take advantage of the
+    * This reduces the memory by having smaller keys and allows us to take advantage of the
     * fastutils library.
     * @param x
     * @param y
@@ -69,11 +73,6 @@ class SuperCell(val cells:Int2IntMap, val size:Int, val base:Cellid) extends Ser
   * @param size
   */
 class SuperCellFactory(val size:Int) extends Serializable {
-  private def base(cellID:Cellid):Cellid = {
-    val (x, y, t) = cellID
-    ((x / size) * size, (y / size) * size, (t / size) * size)
-  }
-
   private def superID(cellID:Cellid):Cellid = {
     (cellID._1 - (cellID._1 % size), cellID._2 - (cellID._2 % size), cellID._3 - (cellID._3 % size))
   }

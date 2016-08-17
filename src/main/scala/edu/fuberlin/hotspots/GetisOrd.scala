@@ -26,13 +26,17 @@ object GetisOrd {
     */
   def calculate(cells:RDD[(Int, Int)]):RDD[(Int, Double, Double)] = {
     cells.cache()
-    val stdDev = cells.values.stdev
-    val mean = cells.values.mean
-    val count = cells.count
-    val norm = new NormalDistribution()
+    //Phase 2 (from cells to supercells)
     val factory = new SuperCellFactory(superCellSize)
     val superCells = cells.flatMap(factory.create).aggregateByKey(Seq[(Int, Int)]())(_ :+ _, _ ++ _)
       .map(c => new SuperCell(c._2, superCellSize, c._1))
+    //End Phase 2
+
+    //Phase 3 (from supercells to zscore)
+    val norm = new NormalDistribution()
+    val stdDev = cells.values.stdev
+    val mean = cells.values.mean
+    val count = cells.count
     cells.unpersist()
     superCells.flatMap(superCell => {
       val buffer = new ListBuffer[(Int, Double, Double)]
@@ -51,5 +55,6 @@ object GetisOrd {
       }
       buffer
     })
+    //End Phase 3
   }
 }

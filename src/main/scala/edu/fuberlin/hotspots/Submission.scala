@@ -9,7 +9,7 @@ import scala.util.matching.Regex
 
 /**
   * An implementation of the GetisOrd G* statistics that is tailored to NYC taxi data from 2015.
-  * (really, other years than 2015 are not supported :) )
+  * (really, years other than 2015 are not supported :) )
   * It supports also only a very simple weight matrix, where all neighbouring cells are 1 and the others 0.
   * Created by Christian Windolf on 29.06.16.
   */
@@ -28,27 +28,27 @@ object Submission {
 
     val conf = new SparkConf().setAppName("Fu-Berlin")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    conf.set("spark.kryo.registrationRequired", "true")
+    conf.set("spark.kryo.registrationRequired", "false")
     conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
+
+    /*
+    Register classes for the kryo serializer.
+    The code here might break easily, for example perhaps by using
+    Oracle JDK instead of OpenJDK or by adding another anonymous function somewhere in this file
+    These problems are common with this serializer
+     */
     conf.registerKryoClasses(Array(classOf[org.apache.spark.util.StatCounter],
       classOf[scala.math.Ordering$$anon$9], classOf[scala.math.Ordering$$anonfun$by$1],
       Class.forName("edu.fuberlin.hotspots.Submission$$anonfun$4"), Class.forName("scala.math.Ordering$Double$")
     ))
+
     val sc = new SparkContext(conf)
     submit(sc, inputDirectory, outputFile, gridSize, timeSpan)
   }
 
-  def printHelp = {
-    println("How to use it:")
-    println("  spark-submit --class edu.fuberlin.hotspots.Submission --master someMasterUrl \\")
-    println("  path/to/jar \\")
-    println("  {hdfs,file,}://path/to/input_directory \\")
-    println("  {hdfs,file,}://path/to/output_file \\")
-    println("  {spatial gridsize in degrees (0.001 for example)}")
-  }
-
   val dateRegex = new Regex("""^2015-(\d{2})-(\d{2}).*""")
+
   /**
     * compute the getis ord G* statistics with the given spark context
     * It outputs the 50 hottest zones.
@@ -57,7 +57,7 @@ object Submission {
     * @param sc SparkContext, must not be stopped when calling this function
     * @param inputDir The directory or file to read the csv from.
     * @param outputFile File to store the result
-    * @param gridSize Size of a grid in degrees. Minimum supported value: 0.001, can be either a String or a Double.
+    * @param gridSize Size of a grid in degrees. Minimum supported value: 0.0005, can be either a String or a Double.
     * @param timeSpan number of days that span over a cell, can be either an Integer or a String.
     */
   def submit(sc:SparkContext, inputDir:String, outputFile:String, gridSize:Any, timeSpan:Any):Unit = {
@@ -66,10 +66,11 @@ object Submission {
     val taxiData = sc.textFile(inputDir)
     val xOrigin = (MIN_LONGITUDE / gs).toInt
     val yOrigin = (MIN_LATITUDE / gs).toInt
+    //Phase 1: from to lines to cells
     val cells = taxiData.map{line =>
       try {
         val fields = line.split(",")
-        //turned out we loose with the standard date parsing libraries about 10 secs, so we implemented
+        //turned out we lose with the standard date parsing libraries about 10 secs, so we implemented
         //it ourself
         val dateRegex(m, d) = fields(2)
         val (month, day) = (m.toInt, d.toInt)
@@ -88,6 +89,10 @@ object Submission {
         }
       } catch{case e:Throwable => None}
     }.collect({case Some(t) => t}).reduceByKey(_ + _)
+    //end Phase 1
+
+    //Phase 2 (from cells to supercells) and Phase 3 (from supercells to zscores)
+    // are calculated inside the GetisOrd.calculate
     val zvalues = GetisOrd.calculate(cells)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> (decompose(c._1), c._2, c._3))
       .map(c=> s"${c._1._1 + xOrigin}, ${c._1._2 + yOrigin}, ${c._1._3}, ${c._2}, ${c._3}")
@@ -101,5 +106,15 @@ object Submission {
     output.foreach(line => stream.write((line + "\n").getBytes()))
     stream.flush()
     stream.close()
+
+  }
+
+  def printHelp = {
+    println("How to use it:")
+    println("  spark-submit --class edu.fuberlin.hotspots.Submission --master someMasterUrl \\")
+    println("  path/to/jar \\")
+    println("  {hdfs,file,}://path/to/input_directory \\")
+    println("  {hdfs,file,}://path/to/output_file \\")
+    println("  {spatial gridsize in degrees (0.001 for example)}")
   }
 }
