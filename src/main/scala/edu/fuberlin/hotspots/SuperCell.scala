@@ -79,10 +79,13 @@ class SuperCellFactory(val size:Int) extends Serializable {
   }
 
   private def offsets(coordinate:Long):Seq[Int] = {
-    coordinate % size match {
-      case 0 => Seq(-1, 0)
-      case mod if mod == size - 1  => Seq(0, 1)
-      case _ => Seq(0)
+    coordinate match{
+      case 0 => Seq(0)
+      case c => c % size match{
+        case 0 => Seq(-1, 0)
+        case mod if mod == size - 1  => Seq(0, 1)
+        case _ => Seq(0)
+      }
     }
   }
 
