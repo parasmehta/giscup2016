@@ -18,11 +18,11 @@ class GetisOrdWithoutHotspotsSpec extends SparkSpec with Matchers {
   }
 
   it should "not return more items than the input" taggedAs(SparkSpec) in { f =>
-    GetisOrd.calculate(f.context.parallelize(createTestData)).count.toInt should be <= 100 * 100 * 100
+    GetisOrd.calculate(f.context.parallelize(createTestData), 1000000L).count.toInt should be <= 100 * 100 * 100
   }
 
   it should "only have unique cell identifiers" taggedAs(SparkSpec) in { f =>
-    val results = GetisOrd.calculate(f.context.parallelize(createTestData)).collect.map(_._1)
+    val results = GetisOrd.calculate(f.context.parallelize(createTestData), 1000000L).collect.map(_._1)
     results.toSet.size shouldEqual results.size
   }
 }

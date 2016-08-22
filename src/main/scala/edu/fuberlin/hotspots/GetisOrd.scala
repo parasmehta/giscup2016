@@ -24,7 +24,7 @@ object GetisOrd {
     * @param cells
     * @return
     */
-  def calculate(cells:RDD[(Int, Int)]):RDD[(Int, Double, Double)] = {
+  def calculate(cells:RDD[(Int, Int)], count:Long):RDD[(Int, Double, Double)] = {
     cells.cache()
     //Phase 2 (from cells to supercells)
     val factory = new SuperCellFactory(superCellSize)
@@ -33,18 +33,17 @@ object GetisOrd {
     //End Phase 2
 
     //Phase 3 (from supercells to zscore)
-    val norm = new NormalDistribution()
-    val stdDev = cells.values.stdev
-    val mean = cells.values.mean
-    val count = cells.count
+    val sum = cells.values.sum
+    val mean = sum.toDouble / count.toDouble
+    val stdDev = math.sqrt((cells.values.map(p => p * p).sum / count) - (mean * mean))
     cells.unpersist()
+    val norm = new NormalDistribution()
+    val denominator = stdDev * sqrt(((count * 27) - 729) / (count - 1))
     superCells.flatMap(superCell => {
       val buffer = new ListBuffer[(Int, Double, Double)]
       for((cellid, passengerCount) <- superCell.coreCells){
         val neighbours = superCell.neighbours(cellid)
-        val radicant = ((count * neighbours.size) - pow(neighbours.size, 2.0)) / (count - 1)
-        val denominator = stdDev * sqrt(radicant)
-        val numerator = neighbours.sum - (mean * neighbours.size)
+        val numerator = neighbours.sum - mean * 27
         val zValue = numerator / denominator
         /*
         It was not absolutely clear, how the p-value should be calculated (assuming which distribution and so on)

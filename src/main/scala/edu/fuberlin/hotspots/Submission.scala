@@ -28,7 +28,7 @@ object Submission {
 
     val conf = new SparkConf().setAppName("Fu-Berlin")
     conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    conf.set("spark.kryo.registrationRequired", "false")
+    conf.set("spark.kryo.registrationRequired", "true")
     conf.set("spark.driver.extraJavaOptions", "-XX:+UseCompressedOops")
     conf.set("spark.executor.extraJavaOptions", "-XX:+UseCompressedOops")
 
@@ -66,6 +66,8 @@ object Submission {
     val taxiData = sc.textFile(inputDir, 200)
     val xOrigin = (MIN_LONGITUDE / gs).toInt
     val yOrigin = (MIN_LATITUDE / gs).toInt
+    val count = (math.ceil((MAX_LONGITUDE - MIN_LONGITUDE)/gs).toLong + 1) * (math.ceil((MAX_LATITUDE - MIN_LATITUDE)/gs).toLong + 1) * (365/ts)
+
     //Phase 1: from to lines to cells
     val cells = taxiData.map{line =>
       try {
@@ -83,7 +85,7 @@ object Submission {
         val latitude = fields(10).toDouble
         if(latitude >= MIN_LATITUDE && latitude <= MAX_LATITUDE &&
           longitude >= MIN_LONGITUDE && longitude <= MAX_LONGITUDE){
-          Some((compose((longitude / gs).toInt - xOrigin, (latitude / gs).toInt - yOrigin, t / ts), passengerCount))
+          Some((compose((longitude / gs).toInt - xOrigin, (latitude / gs).toInt - yOrigin, t/ts), passengerCount))
         } else {
           None
         }
@@ -93,7 +95,7 @@ object Submission {
 
     //Phase 2 (from cells to supercells) and Phase 3 (from supercells to zscores)
     // are calculated inside the GetisOrd.calculate
-    val zvalues = GetisOrd.calculate(cells)
+    val zvalues = GetisOrd.calculate(cells, count)
     val output = zvalues.top(50)(Ordering.by(_._2)).map(c=> (decompose(c._1), c._2, c._3))
       .map(c=> s"${c._1._1 + xOrigin}, ${c._1._2 + yOrigin}, ${c._1._3}, ${c._2}, ${c._3}")
     val stream = outputFile.slice(0,4).toLowerCase match {
