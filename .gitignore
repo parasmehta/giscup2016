@@ -3,3 +3,4 @@ target/
 .idea/
 derby.log
 metastore_db
+*.tar.gz
