@@ -11,7 +11,7 @@ Paras Mehta, Christian Windolf, and Agnès Voisard.
 
 ## FU Berlin submission
 
-This project is an implementation for the [SIGSPATIAL 2016 Cup](http://sigspatial2016.sigspatial.org/giscup2016/).
+This project is an implementation for the [GIS Cup 2016](http://sigspatial2016.sigspatial.org/giscup2016/). It got the third place among all submissions.
 
 
 ## Build
