@@ -2,6 +2,7 @@
 
 ## Using the code
 If you use this code, please cite our paper
+
 `Spatio-temporal Hotspot Computation on Apache Spark 
 Paras Mehta, Christian Windolf, and Agnès Voisard. 24th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems (ACM SIGSPATIAL 2016)`
 
