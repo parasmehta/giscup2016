@@ -1,7 +1,7 @@
 # GetisOrd Hotspot Detection
 
 ## Using the code
-If you use this code, please cite our [paper][doc/giscup2016_final.pdf].
+If you use this code, please cite our [paper](doc/giscup2016_final.pdf).
 
 ```
 Spatio-Temporal Hotspot Computation on Apache Spark.
